@@ -83,13 +83,7 @@ VOID TaskDialogLinkClicked(
 {
     if (!PhIsNullOrEmptyString(Context->ReleaseNotesUrl))
     {
-        DialogBoxParam(
-            PluginInstance->DllBase, 
-            MAKEINTRESOURCE(IDD_TEXT),
-            Context->DialogHandle,
-            TextDlgProc, 
-            (LPARAM)Context
-            );
+        ShowChangelogDialog(Context);
     }
 }
 
@@ -309,7 +303,6 @@ BOOLEAN QueryUpdateData(
     HINTERNET httpRequestHandle = NULL;
     ULONG stringBufferLength = 0;
     PSTR stringBuffer = NULL;
-    PH_STRING_BUILDER sb;
     PVOID jsonObject = NULL;
     mxml_node_t* xmlNode = NULL;
     PPH_STRING versionHeader = UpdateVersionString();
@@ -429,21 +422,6 @@ BOOLEAN QueryUpdateData(
     Context->ReleaseNotesUrl = PhConvertUtf8ToUtf16(GetJsonValueAsString(jsonObject, "forum_url"));
     Context->SetupFileDownloadUrl = PhConvertUtf8ToUtf16(GetJsonValueAsString(jsonObject, "setup_url"));
     Context->BuildMessage = PhConvertUtf8ToUtf16(GetJsonValueAsString(jsonObject, "changelog"));
-
-    if (Context->BuildMessage)
-    {
-        PhInitializeStringBuilder(&sb, 0x100);
-
-        for (SIZE_T i = 0; i < Context->BuildMessage->Length / sizeof(WCHAR); i++)
-        {
-            if (Context->BuildMessage->Data[i] == '\n')
-                PhAppendStringBuilder2(&sb, L"\r\n");
-            else
-                PhAppendCharStringBuilder(&sb, Context->BuildMessage->Data[i]);
-        }
-
-        PhMoveReference(&Context->BuildMessage, PhFinalStringBuilderString(&sb));
-    }
 
     CleanupJsonParser(jsonObject);
 

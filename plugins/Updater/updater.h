@@ -180,11 +180,8 @@ VOID ShowOptionsDialog(
     _In_opt_ HWND Parent
     );
 
-INT_PTR CALLBACK TextDlgProc(
-    _In_ HWND hwndDlg,
-    _In_ UINT uMsg,
-    _In_ WPARAM wParam,
-    _In_ LPARAM lParam
+VOID ShowChangelogDialog(
+    _In_opt_ PPH_UPDATER_CONTEXT Context
     );
 
 // verify.c
@@ -223,12 +220,6 @@ BOOLEAN UpdaterVerifySignature(
 
 VOID UpdaterDestroyHash(
     _Inout_ PUPDATER_HASH_CONTEXT Context
-    );
-
-// info.c
-
-VOID ShowLinkDialog(
-    _In_ PPH_UPDATER_CONTEXT Context
     );
 
 #endif
