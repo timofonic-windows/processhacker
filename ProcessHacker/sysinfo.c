@@ -59,6 +59,10 @@
 #include <phsettings.h>
 #include <procprv.h>
 
+LRESULT PhSipDialogThemeDrawButton(
+    _In_ LPNMTVCUSTOMDRAW drawInfo
+    );
+
 static HANDLE PhSipThread = NULL;
 HWND PhSipWindow = NULL;
 static PPH_LIST PhSipDialogList = NULL;
@@ -240,8 +244,15 @@ INT_PTR CALLBACK PhSipSysInfoDialogProc(
             PhSipOnCommand(LOWORD(wParam), HIWORD(wParam));
         }
         break;
+    case WM_DRAWITEM:
+        {
+            if (PhSipOnDrawItem(wParam, (DRAWITEMSTRUCT *)lParam))
+                return TRUE;
+        }
+        break;
     case WM_NOTIFY:
         {
+            LPNMHDR data = (LPNMHDR)lParam;
             LRESULT result;
 
             if (PhSipOnNotify((NMHDR *)lParam, &result))
@@ -249,12 +260,37 @@ INT_PTR CALLBACK PhSipSysInfoDialogProc(
                 SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, result);
                 return TRUE;
             }
+
+            switch (data->code)
+            {
+            case NM_CUSTOMDRAW:
+                {
+                    SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, PhSipDialogThemeDrawButton((LPNMTVCUSTOMDRAW)lParam));
+                    return TRUE;
+                }
+                break;
+            }
         }
         break;
-    case WM_DRAWITEM:
+    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORDLG:
+    case WM_CTLCOLORSTATIC:
         {
-            if (PhSipOnDrawItem(wParam, (DRAWITEMSTRUCT *)lParam))
-                return TRUE;
+            SetBkMode((HDC)wParam, TRANSPARENT);
+
+            switch (PhCsGraphColorMode)
+            {
+            case 0: // New colors
+                SetTextColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
+                SetDCBrushColor((HDC)wParam, RGB(0xef, 0xef, 0xef));
+                break;
+            case 1: // Old colors
+                SetTextColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
+                SetDCBrushColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
+                break;
+            }
+
+            return (INT_PTR)GetStockObject(DC_BRUSH);
         }
         break;
     }
@@ -274,6 +310,31 @@ INT_PTR CALLBACK PhSipContainerDialogProc(
     _In_ LPARAM lParam
     )
 {
+    switch (uMsg)
+    {
+    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORDLG:
+    case WM_CTLCOLORSTATIC:
+        {
+            SetBkMode((HDC)wParam, TRANSPARENT);
+
+            switch (PhCsGraphColorMode)
+            {
+            case 0: // New colors
+                SetTextColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
+                SetDCBrushColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
+                break;
+            case 1: // Old colors
+                SetTextColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
+                SetDCBrushColor((HDC)wParam, RGB(30, 30, 30));
+                break;
+            }
+
+            return (INT_PTR)GetStockObject(DC_BRUSH);
+        }
+        break;
+    }
+
     return FALSE;
 }
 
@@ -419,8 +480,6 @@ VOID PhSipOnShowWindow(
 
     SetWindowSubclass(RestoreSummaryControl, PhSipPanelHookWndProc, 0, 0);
     RestoreSummaryControlHot = FALSE;
-
-    EnableThemeDialogTexture(ContainerControl, ETDT_ENABLETAB);
 
     GetWindowRect(GetDlgItem(PhSipWindow, IDOK), &buttonRect);
     MapWindowPoints(NULL, PhSipWindow, (POINT *)&buttonRect, 2);
@@ -1215,7 +1274,15 @@ VOID PhSipDrawRestoreSummaryPanel(
     _In_ PRECT Rect
     )
 {
-    FillRect(hdc, Rect, GetSysColorBrush(COLOR_3DFACE));
+    switch (PhCsGraphColorMode)
+    {
+    case 0: // New colors
+        FillRect(hdc, Rect, GetSysColorBrush(COLOR_3DFACE));
+        break;
+    case 1: // Old colors
+        FillRect(hdc, Rect, GetSysColorBrush(COLOR_WINDOWTEXT));
+        break;
+    }
 
     if (RestoreSummaryControlHot || RestoreSummaryControlHasFocus)
     {
@@ -1236,10 +1303,20 @@ VOID PhSipDrawRestoreSummaryPanel(
         }
     }
 
-    SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
     SetBkMode(hdc, TRANSPARENT);
+    
+    switch (PhCsGraphColorMode)
+    {
+    case 0: // New colors
+        SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
+        break;
+    case 1: // Old colors
+        SetTextColor(hdc, RGB(0x0, 0xff, 0x0));
+        break;
+    }
 
     SelectObject(hdc, CurrentParameters.MediumFont);
+
     DrawText(hdc, L"Back", 4, Rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 }
 
@@ -1265,7 +1342,17 @@ VOID PhSipDrawPanel(
     PH_SYSINFO_DRAW_PANEL sysInfoDrawPanel;
 
     if (CurrentView == SysInfoSectionView)
-        FillRect(hdc, Rect, GetSysColorBrush(COLOR_3DFACE));
+    {
+        switch (PhCsGraphColorMode)
+        {
+        case 0: // New colors
+            FillRect(hdc, Rect, GetSysColorBrush(COLOR_3DFACE));
+            break;
+        case 1: // Old colors
+            FillRect(hdc, Rect, GetSysColorBrush(COLOR_WINDOWTEXT));
+            break;
+        }
+    }
 
     sysInfoDrawPanel.hdc = hdc;
     sysInfoDrawPanel.Rect = *Rect;
@@ -1359,11 +1446,27 @@ VOID PhSipDefaultDrawPanel(
 
             if (Section->GraphHot || Section->PanelHot || Section->HasFocus)
             {
-                brush = GetSysColorBrush(COLOR_WINDOW); // TODO: Use a different color
+                switch (PhCsGraphColorMode)
+                {
+                case 0: // New colors
+                    brush = GetSysColorBrush(COLOR_WINDOW); // TODO: Use a different color
+                    break;
+                case 1: // Old colors
+                    brush = GetSysColorBrush(COLOR_WINDOWTEXT); // TODO: Use a different color
+                    break;
+                }
             }
             else if (Section == CurrentSection)
             {
-                brush = GetSysColorBrush(COLOR_WINDOW);
+                switch (PhCsGraphColorMode)
+                {
+                case 0: // New colors
+                    brush = GetSysColorBrush(COLOR_WINDOW); // TODO: Use a different color
+                    break;
+                case 1: // Old colors
+                    brush = GetSysColorBrush(COLOR_WINDOWTEXT); // TODO: Use a different color
+                    break;
+                }
             }
 
             if (brush)
@@ -1373,12 +1476,12 @@ VOID PhSipDefaultDrawPanel(
         }
     }
 
+    SetBkMode(hdc, TRANSPARENT);
+
     if (CurrentView == SysInfoSummaryView)
         SetTextColor(hdc, CurrentParameters.PanelForeColor);
     else
-        SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
-
-    SetBkMode(hdc, TRANSPARENT);
+        SetTextColor(hdc, CurrentParameters.PanelForeColor);
 
     rect.left = CurrentParameters.SmallGraphPadding + CurrentParameters.PanelPadding;
     rect.top = CurrentParameters.PanelPadding;
@@ -1692,6 +1795,139 @@ VOID PhSipRestoreSummaryView(
     PhSipLayoutSummaryView();
 }
 
+LRESULT PhSipDialogThemeDrawButton(
+    _In_ LPNMTVCUSTOMDRAW drawInfo
+    )
+{
+    BOOLEAN isGrayed = (drawInfo->nmcd.uItemState & CDIS_GRAYED) == CDIS_GRAYED;
+    BOOLEAN isChecked = (drawInfo->nmcd.uItemState & CDIS_CHECKED) == CDIS_CHECKED;
+    BOOLEAN isDisabled = (drawInfo->nmcd.uItemState & CDIS_DISABLED) == CDIS_DISABLED;
+    BOOLEAN isSelected = (drawInfo->nmcd.uItemState & CDIS_SELECTED) == CDIS_SELECTED;
+    BOOLEAN isHighlighted = (drawInfo->nmcd.uItemState & CDIS_HOT) == CDIS_HOT;
+    BOOLEAN isFocused = (drawInfo->nmcd.uItemState & CDIS_FOCUS) == CDIS_FOCUS;
+
+    if (drawInfo->nmcd.dwDrawStage == CDDS_PREPAINT)
+    {
+        SetBkMode(drawInfo->nmcd.hdc, TRANSPARENT);
+
+        if (isSelected)
+        {
+            SetDCBrushColor(drawInfo->nmcd.hdc, RGB(78, 78, 78)); // RGB(65, 65, 65)));
+            FillRect(drawInfo->nmcd.hdc, &drawInfo->nmcd.rc, GetStockObject(DC_BRUSH));
+            SetBkColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHT));
+            SetTextColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+        }
+        else if (isHighlighted)
+        {
+            SetDCBrushColor(drawInfo->nmcd.hdc, RGB(42, 42, 42)); // RGB(78, 78, 78));
+            FillRect(drawInfo->nmcd.hdc, &drawInfo->nmcd.rc, GetStockObject(DC_BRUSH));
+            SetBkColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHT));
+            SetTextColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+        }
+        else
+        {
+            SetDCBrushColor(drawInfo->nmcd.hdc, RGB(28, 28, 28)); // RGB(65, 65, 65));
+            FillRect(drawInfo->nmcd.hdc, &drawInfo->nmcd.rc, GetStockObject(DC_BRUSH));
+            SetBkColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_WINDOW));
+            SetTextColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+        }
+    }
+
+    return CDRF_DODEFAULT;
+}
+
+LRESULT CALLBACK PhSipDialogHookWndProc(
+    _In_ HWND hwnd,
+    _In_ UINT uMsg,
+    _In_ WPARAM wParam,
+    _In_ LPARAM lParam,
+    _In_ UINT_PTR uIdSubclass,
+    _In_ ULONG_PTR dwRefData
+    )
+{
+    PPH_SYSINFO_SECTION section = (PPH_SYSINFO_SECTION)dwRefData;
+
+    switch (uMsg)
+    {
+    case WM_DESTROY:
+        RemoveWindowSubclass(hwnd, PhSipGraphHookWndProc, uIdSubclass);
+        break;
+    case WM_NOTIFY:
+        {
+            LPNMHDR data = (LPNMHDR)lParam;
+
+            switch (data->code)
+            {
+            case NM_CUSTOMDRAW:
+                {
+                    SetWindowLongPtr(hwnd, DWLP_MSGRESULT, PhSipDialogThemeDrawButton((LPNMTVCUSTOMDRAW)lParam));
+                    return TRUE;
+                }
+                break;
+            }
+        }
+        break;
+    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORDLG:
+    case WM_CTLCOLORSTATIC:
+        {
+            SetBkMode((HDC)wParam, TRANSPARENT);
+
+            switch (PhCsGraphColorMode)
+            {
+            case 0: // New colors
+                SetTextColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
+                SetDCBrushColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
+                break;
+            case 1: // Old colors
+                SetTextColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
+                SetDCBrushColor((HDC)wParam, RGB(30, 30, 30));
+                break;
+            }
+
+            return (INT_PTR)GetStockObject(DC_BRUSH);
+        }
+        break;
+    }
+
+    return DefSubclassProc(hwnd, uMsg, wParam, lParam);
+}
+
+BOOL CALLBACK PhpSectionWindowsEnumWindowsProc(
+    _In_ HWND WindowHandle,
+    _In_ LPARAM lParam
+    )
+{
+    PPH_SYSINFO_SECTION context = (PPH_SYSINFO_SECTION)lParam;
+    WCHAR className[256];
+
+    if (!GetClassName(WindowHandle, className, ARRAYSIZE(className)))
+        className[0] = 0;
+
+    if (PhEqualStringZ(className, L"#32770", FALSE))
+    {
+        SetWindowSubclass(
+            WindowHandle, 
+            PhSipDialogHookWndProc, 
+            0, 
+            (ULONG_PTR)context
+            );
+
+        PhEnumChildWindows(
+            WindowHandle, 
+            0x1000, 
+            PhpSectionWindowsEnumWindowsProc, 
+            (LPARAM)context
+            );
+    } 
+    else if (PhEqualStringZ(className, L"Button", FALSE))
+    {
+        ULONG windowStyle = (ULONG)GetWindowLongPtr(PhSipWindow, GWL_STYLE);
+    }
+
+    return TRUE;
+}
+
 VOID PhSipCreateSectionDialog(
     _In_ PPH_SYSINFO_SECTION Section
     )
@@ -1711,6 +1947,20 @@ VOID PhSipCreateSectionDialog(
                 createDialog.Template,
                 createDialog.DialogProc,
                 createDialog.Parameter
+                );
+
+            SetWindowSubclass(
+                Section->DialogHandle, 
+                PhSipDialogHookWndProc, 
+                0, 
+                (ULONG_PTR)Section
+                );
+
+            PhEnumChildWindows(
+                Section->DialogHandle, 
+                0x1000, 
+                PhpSectionWindowsEnumWindowsProc, 
+                (LPARAM)Section
                 );
         }
     }
