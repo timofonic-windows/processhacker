@@ -450,9 +450,6 @@ INT_PTR CALLBACK PhpTokenPageProc(
             SetDlgItemText(hwndDlg, IDC_USERSID, L"Unknown");
             SetDlgItemText(hwndDlg, IDC_APPCONTAINERSID, L"Unknown");
 
-            if (!WINDOWS_HAS_UAC)
-                ShowWindow(GetDlgItem(hwndDlg, IDC_INTEGRITY), SW_HIDE);
-
             if (NT_SUCCESS(tokenPageContext->OpenObject(
                 &tokenHandle,
                 TOKEN_QUERY,
@@ -490,34 +487,26 @@ INT_PTR CALLBACK PhpTokenPageProc(
                 if (NT_SUCCESS(PhGetTokenSessionId(tokenHandle, &sessionId)))
                     SetDlgItemInt(hwndDlg, IDC_SESSIONID, sessionId, FALSE);
 
-                if (WINDOWS_HAS_UAC)
-                {
-                    if (NT_SUCCESS(PhGetTokenElevationType(tokenHandle, &elevationType)))
-                        SetDlgItemText(hwndDlg, IDC_ELEVATED, PhGetElevationTypeString(elevationType));
+                if (NT_SUCCESS(PhGetTokenElevationType(tokenHandle, &elevationType)))
+                    SetDlgItemText(hwndDlg, IDC_ELEVATED, PhGetElevationTypeString(elevationType));
 
-                    if (NT_SUCCESS(PhGetTokenIsVirtualizationAllowed(tokenHandle, &isVirtualizationAllowed)))
+                if (NT_SUCCESS(PhGetTokenIsVirtualizationAllowed(tokenHandle, &isVirtualizationAllowed)))
+                {
+                    if (isVirtualizationAllowed)
                     {
-                        if (isVirtualizationAllowed)
+                        if (NT_SUCCESS(PhGetTokenIsVirtualizationEnabled(tokenHandle, &isVirtualizationEnabled)))
                         {
-                            if (NT_SUCCESS(PhGetTokenIsVirtualizationEnabled(tokenHandle, &isVirtualizationEnabled)))
-                            {
-                                SetDlgItemText(
-                                    hwndDlg,
-                                    IDC_VIRTUALIZED,
-                                    isVirtualizationEnabled ? L"Yes" : L"No"
-                                    );
-                            }
-                        }
-                        else
-                        {
-                            SetDlgItemText(hwndDlg, IDC_VIRTUALIZED, L"Not allowed");
+                            SetDlgItemText(
+                                hwndDlg,
+                                IDC_VIRTUALIZED,
+                                isVirtualizationEnabled ? L"Yes" : L"No"
+                                );
                         }
                     }
-                }
-                else
-                {
-                    SetDlgItemText(hwndDlg, IDC_ELEVATED, L"N/A");
-                    SetDlgItemText(hwndDlg, IDC_VIRTUALIZED, L"N/A");
+                    else
+                    {
+                        SetDlgItemText(hwndDlg, IDC_VIRTUALIZED, L"Not allowed");
+                    }
                 }
 
                 if (WINDOWS_HAS_IMMERSIVE)
@@ -934,15 +923,6 @@ INT_PTR CALLBACK PhpTokenPageProc(
     case WM_SIZE:
         PhHSplitterHandleWmSize(tokenPageContext->HSplitterContext, LOWORD(lParam), HIWORD(lParam));
         break;
-    case WM_LBUTTONDOWN:
-        PhHSplitterHandleLButtonDown(tokenPageContext->HSplitterContext, hwndDlg, wParam, lParam);
-        break;
-    case WM_LBUTTONUP:
-        PhHSplitterHandleLButtonUp(tokenPageContext->HSplitterContext, hwndDlg, wParam, lParam);
-        break;
-    case WM_MOUSEMOVE:
-        PhHSplitterHandleMouseMove(tokenPageContext->HSplitterContext, hwndDlg, wParam, lParam);
-        break;
     }
 
     REFLECT_MESSAGE_DLG(hwndDlg, tokenPageContext->GroupsListViewHandle, uMsg, wParam, lParam);
@@ -1128,27 +1108,24 @@ INT_PTR CALLBACK PhpTokenGeneralPageProc(
 
                 PhGetTokenSessionId(tokenHandle, &tokenSessionId);
 
-                if (WINDOWS_HAS_UAC)
+                if (NT_SUCCESS(PhGetTokenElevationType(tokenHandle, &elevationType)))
                 {
-                    if (NT_SUCCESS(PhGetTokenElevationType(tokenHandle, &elevationType)))
-                    {
-                        tokenElevated = PhGetElevationTypeString(elevationType);
-                        hasLinkedToken = elevationType != TokenElevationTypeDefault;
-                    }
+                    tokenElevated = PhGetElevationTypeString(elevationType);
+                    hasLinkedToken = elevationType != TokenElevationTypeDefault;
+                }
 
-                    if (NT_SUCCESS(PhGetTokenIsVirtualizationAllowed(tokenHandle, &isVirtualizationAllowed)))
+                if (NT_SUCCESS(PhGetTokenIsVirtualizationAllowed(tokenHandle, &isVirtualizationAllowed)))
+                {
+                    if (isVirtualizationAllowed)
                     {
-                        if (isVirtualizationAllowed)
+                        if (NT_SUCCESS(PhGetTokenIsVirtualizationEnabled(tokenHandle, &isVirtualizationEnabled)))
                         {
-                            if (NT_SUCCESS(PhGetTokenIsVirtualizationEnabled(tokenHandle, &isVirtualizationEnabled)))
-                            {
-                                tokenVirtualization = isVirtualizationEnabled ? L"Enabled" : L"Disabled";
-                            }
+                            tokenVirtualization = isVirtualizationEnabled ? L"Enabled" : L"Disabled";
                         }
-                        else
-                        {
-                            tokenVirtualization = L"Not Allowed";
-                        }
+                    }
+                    else
+                    {
+                        tokenVirtualization = L"Not Allowed";
                     }
                 }
 

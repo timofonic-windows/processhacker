@@ -109,7 +109,6 @@
 #define IDD_MEMLISTS                    202
 #define IDR_EMPTYMEMLISTS               204
 #define IDD_CONTAINER                   205
-#define IDD_SYSINFO_MEMPANELXP          206
 #define IDD_MINIINFO                    207
 #define IDD_MINIINFO_LIST               210
 #define IDR_MINIINFO                    211
@@ -405,7 +404,6 @@
 #define IDC_PRIVATE                     1238
 #define IDC_IMAGE                       1239
 #define IDC_MAPPED                      1240
-#define IDC_STRINGS                     1242
 #define IDC_SHOWTEXT                    1245
 #define IDC_ICONPROCESSES               1248
 #define IDC_CLEANUP                     1251
@@ -533,10 +531,8 @@
 #define IDC_EDIT                        1383
 #define IDC_NEW                         1384
 #define IDC_HANDLESEARCH                1385
-#define ID_MAINWND_PROCESSTL            2001
-#define ID_MAINWND_SERVICETL            2002
-#define ID_MAINWND_NETWORKTL            2003
-#define ID_MAINWND_PROCESSLV            2004
+#define IDC_SEARCH                      1387
+#define IDC_FILTEROPTIONS               1389
 #define ID_HACKER_EXIT                  40001
 #define ID_PROCESS_PROPERTIES           40006
 #define ID_PROCESS_TERMINATE            40007
@@ -649,7 +645,6 @@
 #define ID_COMPUTER_HIBERNATE           40163
 #define ID_COMPUTER_RESTART             40164
 #define ID_COMPUTER_SHUTDOWN            40165
-#define ID_NETWORK_VIEWSTACK            40167
 #define ID_TRAYICONS_IOHISTORY          40168
 #define ID_ICON_EXIT                    40169
 #define ID_ICON_SHOWHIDEPROCESSHACKER   40171
@@ -679,7 +674,6 @@
 #define ID_MEMORY_DECOMMIT              40211
 #define ID_MEMORY_COPY                  40213
 #define ID_MEMORY_READWRITEMEMORY       40214
-#define ID_MEMORY_READWRITEADDRESS      40215
 #define ID_FILTER_CONTAINS              40216
 #define ID_FILTER_CONTAINS_CASEINSENSITIVE 40218
 #define ID_FILTER_REGEX                 40219
@@ -736,6 +730,7 @@
 #define ID_ENVIRONMENT_COPY             40291
 #define ID_ENVIRONMENT_DELETE           40292
 #define IDC_MAXSCREEN                   40293
+#define ID_EMPTY_COMBINEMEMORYLISTS     40295
 #define IDDYNAMIC                       50000
 #define IDPLUGINS                       55000
 
@@ -743,9 +738,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        228
-#define _APS_NEXT_COMMAND_VALUE         40295
-#define _APS_NEXT_CONTROL_VALUE         1387
+#define _APS_NEXT_RESOURCE_VALUE        231
+#define _APS_NEXT_COMMAND_VALUE         40297
+#define _APS_NEXT_CONTROL_VALUE         1390
 #define _APS_NEXT_SYMED_VALUE           169
 #endif
 #endif

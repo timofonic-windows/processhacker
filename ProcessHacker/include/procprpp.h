@@ -224,6 +224,7 @@ typedef struct _PH_MODULES_CONTEXT
     PH_CALLBACK_REGISTRATION UpdatedEventRegistration;
 
     HWND WindowHandle;
+    HWND SearchboxHandle;
 // end_phapppub
 
     union
@@ -238,6 +239,9 @@ typedef struct _PH_MODULES_CONTEXT
     PH_PROVIDER_EVENT_QUEUE EventQueue;
     NTSTATUS LastRunStatus;
     PPH_STRING ErrorMessage;
+
+    PPH_STRING SearchboxText;
+    PPH_TN_FILTER_ENTRY FilterEntry;
 // begin_phapppub
 } PH_MODULES_CONTEXT, *PPH_MODULES_CONTEXT;
 // end_phapppub
@@ -284,6 +288,7 @@ typedef struct _PH_MEMORY_CONTEXT
 {
     HANDLE ProcessId;
     HWND WindowHandle;
+    HWND SearchboxHandle;
 // end_phapppub
 
     union
@@ -299,6 +304,10 @@ typedef struct _PH_MEMORY_CONTEXT
     BOOLEAN MemoryItemListValid;
     NTSTATUS LastRunStatus;
     PPH_STRING ErrorMessage;
+
+    PPH_STRING SearchboxText;
+    PPH_TN_FILTER_ENTRY AllocationFilterEntry;
+    PPH_TN_FILTER_ENTRY FilterEntry;
 // begin_phapppub
 } PH_MEMORY_CONTEXT, *PPH_MEMORY_CONTEXT;
 // end_phapppub

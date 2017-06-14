@@ -1,8 +1,6 @@
 #ifndef PH_MAINWND_H
 #define PH_MAINWND_H
 
-#define PH_MAINWND_CLASSNAME L"ProcessHacker" // phapppub
-
 PHAPPAPI extern HWND PhMainWndHandle; // phapppub
 extern BOOLEAN PhMainWndExiting;
 
@@ -105,6 +103,7 @@ extern BOOLEAN PhMainWndExiting;
 
 typedef struct _PH_SHOW_MEMORY_EDITOR
 {
+    HWND OwnerWindow;
     HANDLE ProcessId;
     PVOID BaseAddress;
     SIZE_T RegionSize;
