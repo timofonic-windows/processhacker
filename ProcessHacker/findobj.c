@@ -215,6 +215,9 @@ static INT_PTR CALLBACK PhpFindObjectsDlgProc(
         {
             HWND lvHandle;
 
+            SendMessage(hwndDlg, WM_SETICON, ICON_SMALL, (LPARAM)PH_LOAD_SHARED_ICON_SMALL(PhLibImageBase, MAKEINTRESOURCE(IDI_PROCESSHACKER)));
+            SendMessage(hwndDlg, WM_SETICON, ICON_BIG, (LPARAM)PH_LOAD_SHARED_ICON_LARGE(PhLibImageBase, MAKEINTRESOURCE(IDI_PROCESSHACKER)));
+
             PhCenterWindow(hwndDlg, GetParent(hwndDlg));
             PhFindObjectsListViewHandle = lvHandle = GetDlgItem(hwndDlg, IDC_RESULTS);
 
@@ -898,7 +901,7 @@ static NTSTATUS PhpFindObjectsThreadStart(
         PH_WORK_QUEUE workQueue;
         processHandleHashtable = PhCreateSimpleHashtable(8);
 
-        if (!KphIsConnected() && WindowsVersion >= WINDOWS_VISTA)
+        if (!KphIsConnected())
         {
             useWorkQueue = TRUE;
             PhInitializeWorkQueue(&workQueue, 1, 20, 1000);
