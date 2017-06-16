@@ -35,6 +35,8 @@
 #include <procprv.h>
 #include <settings.h>
 
+#include "theme.h"
+
 static PWSTR ProtectedSignerStrings[] =
     { L"", L" (Authenticode)", L" (CodeGen)", L" (Antimalware)", L" (Lsa)", L" (Windows)", L" (WinTcb)", L" (WinSystem)" };
 
@@ -409,6 +411,8 @@ INT_PTR CALLBACK PhpProcessGeneralDlgProc(
 
             ShowWindow(GetDlgItem(hwndDlg, IDC_PROCESSTYPELABEL), SW_SHOW);
             ShowWindow(GetDlgItem(hwndDlg, IDC_PROCESSTYPETEXT), SW_SHOW);
+
+            PhThemeInitializeWindow(hwndDlg); // HACK
 #endif
         }
         break;

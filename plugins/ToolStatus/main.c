@@ -765,11 +765,11 @@ LRESULT CALLBACK MainWndSubclassProc(
         break;
     case WM_NOTIFY:
         {
-            LPNMHDR hdr = (LPNMHDR)lParam;
+            LPNMHDR header = (LPNMHDR)lParam;
 
-            if (RebarHandle && hdr->hwndFrom == RebarHandle)
+            if (RebarHandle && header->hwndFrom == RebarHandle)
             {
-                switch (hdr->code)
+                switch (header->code)
                 {
                 case RBN_HEIGHTCHANGE:
                     {
@@ -897,14 +897,129 @@ LRESULT CALLBACK MainWndSubclassProc(
                         ReBarSaveLayoutSettings();
                     }
                     break;
+                case NM_CUSTOMDRAW:
+                    {
+                        LPNMLVCUSTOMDRAW customDraw = (LPNMLVCUSTOMDRAW)header;
+
+                        switch (customDraw->nmcd.dwDrawStage)
+                        {
+                        case CDDS_PREPAINT:
+                            SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                            SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                            FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                            return CDRF_NOTIFYITEMDRAW;
+                        case CDDS_ITEMPREPAINT:
+                            {
+                                BOOLEAN colorChanged = FALSE;
+                                HFONT newFont = NULL;
+
+                                /* if (context->ItemColorFunction)
+                                {
+                                customDraw->clrTextBk = context->ItemColorFunction(
+                                (INT)customDraw->nmcd.dwItemSpec,
+                                (PVOID)customDraw->nmcd.lItemlParam,
+                                context->Context
+                                );
+                                colorChanged = TRUE;
+                                }
+
+                                if (context->ItemFontFunction)
+                                {
+                                newFont = context->ItemFontFunction(
+                                (INT)customDraw->nmcd.dwItemSpec,
+                                (PVOID)customDraw->nmcd.lItemlParam,
+                                context->Context
+                                );
+                                }*/
+
+                                SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+
+                                //if (newFont)
+                                SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
+
+                                //if (colorChanged)
+                                //{
+                                //    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
+                                //        customDraw->clrText = RGB(0x00, 0x00, 0x00);
+                                //    else
+                                //        customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                //}
+                                customDraw->clrText = RGB(0xff, 0xff, 0xff);
+
+                                return CDRF_DODEFAULT;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+
                 }
 
                 goto DefaultWndProc;
             }
-            else if (ToolBarHandle && hdr->hwndFrom == ToolBarHandle)
+            else if (ToolBarHandle && header->hwndFrom == ToolBarHandle)
             {
-                switch (hdr->code)
+                switch (header->code)
                 {
+                case NM_CUSTOMDRAW:
+                    {
+                        LPNMLVCUSTOMDRAW customDraw = (LPNMLVCUSTOMDRAW)header;
+
+                        switch (customDraw->nmcd.dwDrawStage)
+                        {
+                        case CDDS_PREPAINT:
+                            SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                            SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                            FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+
+                            return CDRF_NOTIFYITEMDRAW;
+                        case CDDS_ITEMPREPAINT:
+                            {
+                                BOOLEAN colorChanged = FALSE;
+                                HFONT newFont = NULL;
+
+                               /* if (context->ItemColorFunction)
+                                {
+                                    customDraw->clrTextBk = context->ItemColorFunction(
+                                        (INT)customDraw->nmcd.dwItemSpec,
+                                        (PVOID)customDraw->nmcd.lItemlParam,
+                                        context->Context
+                                    );
+                                    colorChanged = TRUE;
+                                }
+
+                                if (context->ItemFontFunction)
+                                {
+                                    newFont = context->ItemFontFunction(
+                                        (INT)customDraw->nmcd.dwItemSpec,
+                                        (PVOID)customDraw->nmcd.lItemlParam,
+                                        context->Context
+                                    );
+                                }*/
+                                SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+
+                                //if (newFont)
+                                SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
+
+                                //if (colorChanged)
+                                //{
+                                //    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
+                                        customDraw->clrText = RGB(0x00, 0x00, 0x00);
+                                //    else
+                                //        customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                //}
+                                //customDraw->clrText = RGB(0xff, 0xff, 0xff);
+
+                                return CDRF_DODEFAULT;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                    
                 case TBN_GETDISPINFO:
                     {
                         LPNMTBDISPINFO toolbarDisplayInfo = (LPNMTBDISPINFO)lParam;
@@ -965,7 +1080,7 @@ LRESULT CALLBACK MainWndSubclassProc(
                     break;
                 case TBN_DROPDOWN:
                     {
-                        LPNMTOOLBAR toolbar = (LPNMTOOLBAR)hdr;
+                        LPNMTOOLBAR toolbar = (LPNMTOOLBAR)header;
                         PPH_EMENU menu;
                         PPH_EMENU_ITEM selectedItem;
 
@@ -1005,7 +1120,7 @@ LRESULT CALLBACK MainWndSubclassProc(
                     return TBDDRET_DEFAULT;
                 case NM_LDOWN:
                     {
-                        LPNMCLICK toolbar = (LPNMCLICK)hdr;
+                        LPNMCLICK toolbar = (LPNMCLICK)header;
                         ULONG id = (ULONG)toolbar->dwItemSpec;
 
                         if (id == -1)
@@ -1041,9 +1156,9 @@ LRESULT CALLBACK MainWndSubclassProc(
 
                 goto DefaultWndProc;
             }
-            else if (StatusBarHandle && hdr->hwndFrom == StatusBarHandle)
+            else if (StatusBarHandle && header->hwndFrom == StatusBarHandle)
             {
-                switch (hdr->code)
+                switch (header->code)
                 {
                 case NM_RCLICK:
                     {
@@ -1055,13 +1170,13 @@ LRESULT CALLBACK MainWndSubclassProc(
                 goto DefaultWndProc;
             }
             else if (
-                CpuGraphHandle && hdr->hwndFrom == CpuGraphHandle ||
-                MemGraphHandle && hdr->hwndFrom == MemGraphHandle ||
-                CommitGraphHandle && hdr->hwndFrom == CommitGraphHandle ||
-                IoGraphHandle && hdr->hwndFrom == IoGraphHandle
+                CpuGraphHandle && header->hwndFrom == CpuGraphHandle ||
+                MemGraphHandle && header->hwndFrom == MemGraphHandle ||
+                CommitGraphHandle && header->hwndFrom == CommitGraphHandle ||
+                IoGraphHandle && header->hwndFrom == IoGraphHandle
                 )
             {
-                ToolbarUpdateGraphsInfo(hdr);
+                ToolbarUpdateGraphsInfo(header);
 
                 goto DefaultWndProc;
             }
@@ -1182,7 +1297,7 @@ LRESULT CALLBACK MainWndSubclassProc(
 
                                 if (processItem = PhReferenceProcessItem(UlongToHandle(processId)))
                                 {
-                                    if (propContext = PhCreateProcessPropContext(hWnd, processItem))
+                                    if (propContext = PhCreateProcessPropContext(processItem))
                                     {
                                         PhSetSelectThreadIdProcessPropContext(propContext, UlongToHandle(threadId));
                                         PhShowProcessProperties(propContext);

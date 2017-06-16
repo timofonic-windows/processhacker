@@ -352,7 +352,7 @@ VOID PhShowHandleObjectProperties1(
 
             if (targetProcessItem)
             {
-                propContext = PhCreateProcessPropContext(NULL, targetProcessItem);
+                propContext = PhCreateProcessPropContext(targetProcessItem);
                 PhDereferenceObject(targetProcessItem);
                 PhSetSelectThreadIdProcessPropContext(propContext, clientId.UniqueThread);
                 ProcessHacker_Invoke(PhMainWndHandle, PhpShowProcessPropContext, propContext);

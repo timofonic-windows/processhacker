@@ -37,6 +37,7 @@
 #include <phplug.h>
 #include <procprv.h>
 #include <settings.h>
+#include "theme.h"
 
 static PH_STRINGREF EmptyMemoryText = PH_STRINGREF_INIT(L"There are no memory regions to display.");
 
@@ -350,6 +351,8 @@ INT_PTR CALLBACK PhpProcessMemoryDlgProc(
             PhLoadSettingsMemoryList(&memoryContext->ListContext);
 
             PhpRefreshProcessMemoryList(hwndDlg, propPageContext);
+
+            PhThemeInitializeWindow(hwndDlg); // HACK
         }
         break;
     case WM_DESTROY:

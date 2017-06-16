@@ -37,6 +37,7 @@
 #include <settings.h>
 
 #include "pcre/pcre2.h"
+#include "theme.h"
 
 #define WM_PH_SEARCH_UPDATE (WM_APP + 801)
 #define WM_PH_SEARCH_FINISHED (WM_APP + 802)
@@ -259,6 +260,8 @@ static INT_PTR CALLBACK PhpFindObjectsDlgProc(
             PhLoadListViewColumnsFromSetting(L"FindObjListViewColumns", lvHandle);
 
             Button_SetCheck(GetDlgItem(hwndDlg, IDC_REGEX), PhGetIntegerSetting(L"FindObjRegex") ? BST_CHECKED : BST_UNCHECKED);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:

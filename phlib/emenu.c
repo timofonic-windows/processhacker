@@ -473,8 +473,10 @@ HMENU PhEMenuToHMenu(
 
         memset(&menuInfo, 0, sizeof(MENUINFO));
         menuInfo.cbSize = sizeof(MENUINFO);
-        menuInfo.fMask = MIM_STYLE;
+        menuInfo.fMask = MIM_STYLE | MIM_BACKGROUND;
         menuInfo.dwStyle = MNS_CHECKORBMP;
+        menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28)); // LEAK
+
         SetMenuInfo(menuHandle, &menuInfo);
     }
 
@@ -536,7 +538,7 @@ VOID PhEMenuToHMenu2(
 
         if (item->Bitmap)
         {
-            menuItemInfo.fMask |= MIIM_BITMAP;
+            //menuItemInfo.fMask |= MIIM_BITMAP;
             menuItemInfo.hbmpItem = item->Bitmap;
         }
 
@@ -585,6 +587,8 @@ VOID PhEMenuToHMenu2(
             menuItemInfo.fMask |= MIIM_SUBMENU;
             menuItemInfo.hSubMenu = PhEMenuToHMenu(item, Flags, Data);
         }
+
+        menuItemInfo.fType |= MFT_OWNERDRAW;
 
         InsertMenuItem(MenuHandle, MAXINT, TRUE, &menuItemInfo);
     }

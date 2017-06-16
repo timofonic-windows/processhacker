@@ -23,8 +23,9 @@
 #include <phapp.h>
 #include <procprp.h>
 #include <procprpp.h>
-
 #include <procprv.h>
+
+#include "theme.h"
 
 static VOID NTAPI StatisticsUpdateHandler(
     _In_opt_ PVOID Parameter,
@@ -229,6 +230,8 @@ INT_PTR CALLBACK PhpProcessStatisticsDlgProc(
                 );
 
             PhpUpdateProcessStatistics(hwndDlg, processItem, statisticsContext);
+
+            PhThemeInitializeWindow(hwndDlg); // HACK
         }
         break;
     case WM_DESTROY:

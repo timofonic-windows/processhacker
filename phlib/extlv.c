@@ -129,6 +129,10 @@ VOID PhSetExtendedListView(
     context->EnableRedraw = 1;
     context->Cursor = NULL;
 
+    ListView_SetBkColor(hWnd, RGB(30, 30, 30));
+    ListView_SetTextBkColor(hWnd, RGB(30, 30, 30));
+    ListView_SetTextColor(hWnd, RGB(0xff, 0xff, 0xff));
+
     SetWindowSubclass(hWnd, PhpExtendedListViewWndProc, 0, (ULONG_PTR)context);
 
     ExtendedListView_Init(hWnd);

@@ -54,6 +54,7 @@
 #include <sysinfo.h>
 
 #include <mainwndp.h>
+#include "theme.h"
 
 #define RUNAS_MODE_ADMIN 1
 #define RUNAS_MODE_LIMITED 2
@@ -320,10 +321,14 @@ LRESULT CALLBACK PhMwpWndProc(
         }
         break;
     case WM_WTSSESSION_CHANGE:
-        {
-            PhMwpOnWtsSessionChange((ULONG)wParam, (ULONG)lParam);
-        }
+        PhMwpOnWtsSessionChange((ULONG)wParam, (ULONG)lParam);
         break;
+    case WM_MEASUREITEM:
+        PhThemeWindowMeasureItem((LPMEASUREITEMSTRUCT)lParam);
+        return TRUE;
+    case WM_DRAWITEM:
+        PhThemeWindowDrawItem((LPDRAWITEMSTRUCT)lParam);
+        return TRUE;
     }
 
     if (uMsg >= WM_PH_FIRST && uMsg <= WM_PH_LAST)
@@ -404,7 +409,7 @@ VOID PhMwpInitializeControls(
     TabControlHandle = CreateWindow(
         WC_TABCONTROL,
         NULL,
-        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | TCS_MULTILINE,
+        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | TCS_MULTILINE | TCS_OWNERDRAWFIXED,
         0,
         0,
         3,
@@ -414,7 +419,9 @@ VOID PhMwpInitializeControls(
         PhInstanceHandle,
         NULL
         );
-    SendMessage(TabControlHandle, WM_SETFONT, (WPARAM)PhApplicationFont, FALSE);
+
+    PhThemeInitializeTabWindow(TabControlHandle);
+
     BringWindowToTop(TabControlHandle);
 
     thinRows = PhGetIntegerSetting(L"ThinRows") ? TN_STYLE_THIN_ROWS : 0;
@@ -1676,8 +1683,9 @@ VOID PhMwpOnInitMenuPopup(
     // Make sure the menu style is set correctly.
     memset(&menuInfo, 0, sizeof(MENUINFO));
     menuInfo.cbSize = sizeof(MENUINFO);
-    menuInfo.fMask = MIM_STYLE;
+    menuInfo.fMask = MIM_STYLE | MIM_BACKGROUND;
     menuInfo.dwStyle = MNS_CHECKORBMP;
+    menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28));
     SetMenuInfo(Menu, &menuInfo);
 
     menu = PhCreateEMenu();
@@ -2483,14 +2491,16 @@ VOID PhMwpInitializeMainMenu(
     )
 {
     MENUINFO menuInfo;
-    ULONG i;
 
+    memset(&menuInfo, 0, sizeof(MENUINFO));
     menuInfo.cbSize = sizeof(MENUINFO);
-    menuInfo.fMask = MIM_STYLE;
+    menuInfo.fMask = MIM_STYLE | MIM_BACKGROUND;
     menuInfo.dwStyle = MNS_NOTIFYBYPOS;
+    menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28));
+
     SetMenuInfo(Menu, &menuInfo);
 
-    for (i = 0; i < sizeof(SubMenuHandles) / sizeof(HMENU); i++)
+    for (ULONG i = 0; i < ARRAYSIZE(SubMenuHandles); i++)
     {
         SubMenuHandles[i] = GetSubMenu(PhMainWndMenuHandle, i);
     }
@@ -2621,7 +2631,10 @@ VOID PhMwpInitializeSubMenu(
             if (shieldBitmap = PhMwpGetShieldBitmap())
             {
                 if (menuItem = PhFindEMenuItem(Menu, 0, NULL, ID_HACKER_SHOWDETAILSFORALLPROCESSES))
+                {
+                    menuItem->Flags |= MFT_OWNERDRAW;
                     menuItem->Bitmap = shieldBitmap;
+                }
             }
         }
 
@@ -2762,7 +2775,10 @@ VOID PhMwpInitializeSubMenu(
             if (shieldBitmap = PhMwpGetShieldBitmap())
             {
                 if (menuItem = PhFindEMenuItem(Menu, 0, NULL, ID_TOOLS_STARTTASKMANAGER))
+                {
+                    menuItem->Flags |= MFT_OWNERDRAW;
                     menuItem->Bitmap = shieldBitmap;
+                }
             }
         }
     }

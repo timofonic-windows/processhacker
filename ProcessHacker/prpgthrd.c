@@ -34,6 +34,7 @@
 #include <procprv.h>
 #include <thrdlist.h>
 #include <thrdprv.h>
+#include "theme.h"
 
 static PH_STRINGREF EmptyThreadsText = PH_STRINGREF_INIT(L"There are no threads to display.");
 
@@ -616,6 +617,8 @@ INT_PTR CALLBACK PhpProcessThreadsDlgProc(
             PhRegisterThreadProvider(threadsContext->Provider, &threadsContext->ProviderRegistration);
 
             SET_BUTTON_ICON(IDC_OPENSTARTMODULE, PH_LOAD_SHARED_ICON_SMALL(PhLibImageBase, MAKEINTRESOURCE(IDI_FOLDER)));
+
+            PhThemeInitializeWindow(hwndDlg); // HACK
         }
         break;
     case WM_DESTROY:

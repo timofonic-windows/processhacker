@@ -699,7 +699,7 @@ INT_PTR CALLBACK WepWindowsDlgProc(
                     {
                         if (processItem = PhReferenceProcessItem(selectedNode->ClientId.UniqueProcess))
                         {
-                            if (propContext = PhCreateProcessPropContext(WE_PhMainWndHandle, processItem))
+                            if (propContext = PhCreateProcessPropContext(processItem))
                             {
                                 PhSetSelectThreadIdProcessPropContext(propContext, selectedNode->ClientId.UniqueThread);
                                 PhShowProcessProperties(propContext);
@@ -1121,7 +1121,7 @@ INT_PTR CALLBACK WepWindowsPageProc(
                     {
                         if (processItem = PhReferenceProcessItem(selectedNode->ClientId.UniqueProcess))
                         {
-                            if (propContext = PhCreateProcessPropContext(WE_PhMainWndHandle, processItem))
+                            if (propContext = PhCreateProcessPropContext(processItem))
                             {
                                 PhSetSelectThreadIdProcessPropContext(propContext, selectedNode->ClientId.UniqueThread);
                                 PhShowProcessProperties(propContext);

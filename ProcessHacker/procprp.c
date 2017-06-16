@@ -34,6 +34,9 @@
 #include <phsettings.h>
 #include <procprv.h>
 
+#include "mainwnd.h"
+#include "theme.h"
+
 PPH_OBJECT_TYPE PhpProcessPropContextType;
 PPH_OBJECT_TYPE PhpProcessPropPageContextType;
 PH_STRINGREF PhpLoadingText = PH_STRINGREF_INIT(L"Loading...");
@@ -51,7 +54,6 @@ BOOLEAN PhProcessPropInitialization(
 }
 
 PPH_PROCESS_PROPCONTEXT PhCreateProcessPropContext(
-    _In_ HWND ParentWindowHandle,
     _In_ PPH_PROCESS_ITEM ProcessItem
     )
 {
@@ -85,7 +87,6 @@ PPH_PROCESS_PROPCONTEXT PhCreateProcessPropContext(
         PSH_PROPTITLE |
         PSH_USECALLBACK |
         PSH_USEHICON;
-    propSheetHeader.hwndParent = ParentWindowHandle;
     propSheetHeader.hIcon = ProcessItem->SmallIcon;
     propSheetHeader.pszCaption = propContext->Title->Buffer;
     propSheetHeader.pfnCallback = PhpPropSheetProc;
@@ -93,9 +94,6 @@ PPH_PROCESS_PROPCONTEXT PhCreateProcessPropContext(
     propSheetHeader.nPages = 0;
     propSheetHeader.nStartPage = 0;
     propSheetHeader.phpage = propContext->PropSheetPages;
-
-    if (PhCsForceNoParent)
-        propSheetHeader.hwndParent = NULL;
 
     memcpy(&propContext->PropSheetHeader, &propSheetHeader, sizeof(PROPSHEETHEADER));
 
@@ -168,6 +166,8 @@ INT CALLBACK PhpPropSheetProc(
 
             SetProp(hwndDlg, PhMakeContextAtom(), (HANDLE)propSheetContext);
             SetWindowSubclass(hwndDlg, PhpPropSheetWndProc, 0, (ULONG_PTR)propSheetContext);
+
+            PhThemeInitializeWindow(hwndDlg);
 
             if (MinimumSize.left == -1)
             {
@@ -283,15 +283,13 @@ BOOLEAN PhpInitializePropSheetLayoutStage1(
         PPH_LAYOUT_ITEM tabPageItem;
 
         tabControlHandle = PropSheet_GetTabControl(hwnd);
-        tabControlItem = PhAddLayoutItem(&Context->LayoutManager, tabControlHandle,
-            NULL, PH_ANCHOR_ALL | PH_LAYOUT_IMMEDIATE_RESIZE);
-        tabPageItem = PhAddLayoutItem(&Context->LayoutManager, tabControlHandle,
-            NULL, PH_LAYOUT_TAB_CONTROL); // dummy item to fix multiline tab control
 
+        PhThemeInitializeTabWindow(tabControlHandle);
+
+        tabControlItem = PhAddLayoutItem(&Context->LayoutManager, tabControlHandle,  NULL, PH_ANCHOR_ALL | PH_LAYOUT_IMMEDIATE_RESIZE);
+        tabPageItem = PhAddLayoutItem(&Context->LayoutManager, tabControlHandle, NULL, PH_LAYOUT_TAB_CONTROL); // dummy item to fix multiline tab control
         Context->TabPageItem = tabPageItem;
-
-        PhAddLayoutItem(&Context->LayoutManager, GetDlgItem(hwnd, IDCANCEL),
-            NULL, PH_ANCHOR_RIGHT | PH_ANCHOR_BOTTOM);
+        PhAddLayoutItem(&Context->LayoutManager, GetDlgItem(hwnd, IDCANCEL),  NULL, PH_ANCHOR_RIGHT | PH_ANCHOR_BOTTOM);
 
         // Hide the OK button.
         ShowWindow(GetDlgItem(hwnd, IDOK), SW_HIDE);
@@ -299,7 +297,6 @@ BOOLEAN PhpInitializePropSheetLayoutStage1(
         SetDlgItemText(hwnd, IDCANCEL, L"Close");
 
         Context->LayoutInitialized = TRUE;
-
         return TRUE;
     }
 
@@ -330,6 +327,23 @@ VOID PhpInitializePropSheetLayoutStage2(
     windowRectangle.Top += 20;
 
     PhSetIntegerPairSetting(L"ProcPropPosition", windowRectangle.Position);
+
+    SendMessage(PropSheet_GetTabControl(hwnd), WM_SETFONT, (WPARAM)CreateFont(
+        -(LONG)PhMultiplyDivide(15, PhGlobalDpi, 96),
+        0,
+        0,
+        0,
+        FW_SEMIBOLD,
+        FALSE,
+        FALSE,
+        FALSE,
+        ANSI_CHARSET,
+        OUT_DEFAULT_PRECIS,
+        CLIP_DEFAULT_PRECIS,
+        DEFAULT_QUALITY,
+        DEFAULT_PITCH,
+        L"Tahoma"
+        ), FALSE);
 }
 
 BOOLEAN PhAddProcessPropPage(
@@ -352,8 +366,7 @@ BOOLEAN PhAddProcessPropPage(
     PropPageContext->PropContext = PropContext;
     PhReferenceObject(PropContext);
 
-    PropContext->PropSheetPages[PropContext->PropSheetHeader.nPages] =
-        propSheetPageHandle;
+    PropContext->PropSheetPages[PropContext->PropSheetHeader.nPages] = propSheetPageHandle;
     PropContext->PropSheetHeader.nPages++;
 
     return TRUE;
@@ -367,8 +380,7 @@ BOOLEAN PhAddProcessPropPage2(
     if (PropContext->PropSheetHeader.nPages == PH_PROCESS_PROPCONTEXT_MAXPAGES)
         return FALSE;
 
-    PropContext->PropSheetPages[PropContext->PropSheetHeader.nPages] =
-        PropSheetPageHandle;
+    PropContext->PropSheetPages[PropContext->PropSheetHeader.nPages] = PropSheetPageHandle;
     PropContext->PropSheetHeader.nPages++;
 
     return TRUE;
@@ -396,8 +408,7 @@ PPH_PROCESS_PROPPAGECONTEXT PhCreateProcessPropPageContextEx(
     memset(propPageContext, 0, sizeof(PH_PROCESS_PROPPAGECONTEXT));
 
     propPageContext->PropSheetPage.dwSize = sizeof(PROPSHEETPAGE);
-    propPageContext->PropSheetPage.dwFlags =
-        PSP_USECALLBACK;
+    propPageContext->PropSheetPage.dwFlags = PSP_USECALLBACK;
     propPageContext->PropSheetPage.hInstance = InstanceHandle;
     propPageContext->PropSheetPage.pszTemplate = Template;
     propPageContext->PropSheetPage.pfnDlgProc = DlgProc;
@@ -430,10 +441,15 @@ INT CALLBACK PhpStandardPropPageProc(
 
     propPageContext = (PPH_PROCESS_PROPPAGECONTEXT)ppsp->lParam;
 
-    if (uMsg == PSPCB_ADDREF)
+    switch (uMsg)
+    {
+    case PSPCB_ADDREF:
         PhReferenceObject(propPageContext);
-    else if (uMsg == PSPCB_RELEASE)
+        break;
+    case PSPCB_RELEASE:
         PhDereferenceObject(propPageContext);
+        break;
+    }
 
     return 1;
 }
@@ -541,9 +557,9 @@ NTSTATUS PhpProcessPropertiesThreadStart(
     PPH_PROCESS_PROPCONTEXT PropContext = (PPH_PROCESS_PROPCONTEXT)Parameter;
     PPH_PROCESS_PROPPAGECONTEXT newPage;
     PPH_STRING startPage;
-    HWND hwnd;
-    BOOL result;
-    MSG message;
+//    HWND hwnd;
+//    BOOL result;
+//    MSG message;
 
     PhInitializeAutoPool(&autoPool);
 
@@ -670,35 +686,34 @@ NTSTATUS PhpProcessPropertiesThreadStart(
     PropContext->PropSheetHeader.dwFlags |= PSH_USEPSTARTPAGE;
     PropContext->PropSheetHeader.pStartPage = startPage->Buffer;
 
-    hwnd = (HWND)PropertySheet(&PropContext->PropSheetHeader);
+    PhModalPropertySheet(&PropContext->PropSheetHeader);
 
     PhDereferenceObject(startPage);
 
-    PropContext->WindowHandle = hwnd;
-    PhSetEvent(&PropContext->CreatedEvent);
+   // PropContext->WindowHandle = hwnd;
+   // PhSetEvent(&PropContext->CreatedEvent);
 
     // Main event loop
 
-    while (result = GetMessage(&message, NULL, 0, 0))
-    {
-        if (result == -1)
-            break;
+    //while (result = GetMessage(&message, NULL, 0, 0))
+    //{
+    //    if (result == -1)
+    //        break;
 
-        if (!PropSheet_IsDialogMessage(hwnd, &message))
-        {
-            TranslateMessage(&message);
-            DispatchMessage(&message);
-        }
+    //    if (!PropSheet_IsDialogMessage(hwnd, &message))
+    //    {
+    //        TranslateMessage(&message);
+    //        DispatchMessage(&message);
+    //    }
 
-        PhDrainAutoPool(&autoPool);
+    //    PhDrainAutoPool(&autoPool);
 
-        if (!PropSheet_GetCurrentPageHwnd(hwnd))
-            break;
-    }
+    //    if (!PropSheet_GetCurrentPageHwnd(hwnd))
+    //        break;
+    //}
 
-    DestroyWindow(hwnd);
+    //DestroyWindow(hwnd);
     PhDereferenceObject(PropContext);
-
     PhDeleteAutoPool(&autoPool);
 
     return STATUS_SUCCESS;

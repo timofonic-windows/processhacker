@@ -381,6 +381,9 @@
     <ClCompile Include="settings.c">
       <Filter>Process Hacker</Filter>
     </ClCompile>
+    <ClCompile Include="theme.c">
+      <Filter>Process Hacker</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\hidnproc.h">
@@ -540,6 +543,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="include\phsettings.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="theme.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

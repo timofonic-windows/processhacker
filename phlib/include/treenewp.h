@@ -57,7 +57,8 @@ typedef struct _PH_TREENEW_CONTEXT
             ULONG DragSelectionActive : 1;
             ULONG SelectionRectangleAlpha : 1; // use alpha blending for the selection rectangle
             ULONG CustomRowHeight : 1;
-            ULONG Spare : 4;
+            ULONG DarkThemeActive : 1;
+            ULONG Spare : 3;
         };
         ULONG Flags;
     };

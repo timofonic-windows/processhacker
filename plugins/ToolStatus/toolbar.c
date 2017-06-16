@@ -110,8 +110,8 @@ VOID RebarLoadSettings(
     if (ToolStatusConfig.ToolBarEnabled && !ToolBarImageList)
     {
         // Enable scaling the Toolbar and images on high-DPI machines. 
-        ToolBarImageSize.cx = PH_SCALE_DPI(16);
-        ToolBarImageSize.cy = PH_SCALE_DPI(16);
+        ToolBarImageSize.cx = PH_SCALE_DPI(GetSystemMetrics(SM_CXSMICON));
+        ToolBarImageSize.cy = PH_SCALE_DPI(GetSystemMetrics(SM_CYSMICON));
 
         ToolBarImageList = ImageList_Create(ToolBarImageSize.cx, ToolBarImageSize.cy, ILC_COLOR32, 0, 0);
     }
@@ -162,8 +162,8 @@ VOID RebarLoadSettings(
         toolbarButtonSize = (ULONG)SendMessage(ToolBarHandle, TB_GETBUTTONSIZE, 0, 0);
 
         // Enable theming
-        // SendMessage(RebarHandle, RB_SETWINDOWTHEME, 0, (LPARAM)L"Media"); //Media/Communications/BrowserTabBar/Help
-        // SendMessage(ToolBarHandle, TB_SETWINDOWTHEME, 0, (LPARAM)L"Media"); //Media/Communications/BrowserTabBar/Help
+        //SendMessage(RebarHandle, RB_SETWINDOWTHEME, 0, (LPARAM)L"Communications"); //Media/Communications/BrowserTabBar/Help
+        //SendMessage(ToolBarHandle, TB_SETWINDOWTHEME, 0, (LPARAM)L"Communications"); //Media/Communications/BrowserTabBar/Help
 
         // Inset the toolbar into the rebar control.
         RebarBandInsert(REBAR_BAND_ID_TOOLBAR, ToolBarHandle, LOWORD(toolbarButtonSize), HIWORD(toolbarButtonSize));
@@ -172,16 +172,15 @@ VOID RebarLoadSettings(
     if (ToolStatusConfig.SearchBoxEnabled && !SearchboxHandle)
     {
         SearchboxText = PhReferenceEmptyString();
-        ProcessTreeFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportProcessTreeList(), (PPH_TN_FILTER_FUNCTION)ProcessTreeFilterCallback, NULL);
-        ServiceTreeFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportServiceTreeList(), (PPH_TN_FILTER_FUNCTION)ServiceTreeFilterCallback, NULL);
-        NetworkTreeFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportNetworkTreeList(), (PPH_TN_FILTER_FUNCTION)NetworkTreeFilterCallback, NULL);
+        ProcessTreeFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportProcessTreeList(), ProcessTreeFilterCallback, NULL);
+        ServiceTreeFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportServiceTreeList(), ServiceTreeFilterCallback, NULL);
+        NetworkTreeFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportNetworkTreeList(), NetworkTreeFilterCallback, NULL);
 
         CreateSearchboxControl();
     }
 
     if (ToolStatusConfig.StatusBarEnabled && !StatusBarHandle)
     {
-        // Create the StatusBar window.
         StatusBarHandle = CreateWindowEx(
             0,
             STATUSCLASSNAME,

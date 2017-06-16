@@ -51,6 +51,7 @@
 #include <guisup.h>
 
 #include <treenewp.h>
+#include "../ProcessHacker/theme.h"
 
 static PVOID ComCtl32Handle;
 static LONG SmallIconWidth;
@@ -277,6 +278,10 @@ LRESULT CALLBACK PhTnpWndProc(
                 return result;
         }
         break;
+    case WM_MEASUREITEM:
+        return SendMessage(GetParent(hwnd), WM_MEASUREITEM, wParam, lParam); // HACK
+    case WM_DRAWITEM:
+        return SendMessage(GetParent(hwnd), WM_DRAWITEM, wParam, lParam); // HACK
     }
 
     if (uMsg >= TNM_FIRST && uMsg <= TNM_LAST)
@@ -340,6 +345,7 @@ VOID PhTnpCreateTreeNewContext(
     context->TooltipId = -1;
     context->TooltipColumnId = -1;
     context->EnableRedraw = 1;
+    context->DarkThemeActive = 1; // HACK
 
     *Context = context;
 }
@@ -405,7 +411,7 @@ BOOLEAN PhTnpOnCreate(
     if ((Context->Style & TN_STYLE_ANIMATE_DIVIDER) && Context->DoubleBuffered)
         Context->AnimateDivider = TRUE;
 
-    headerStyle = HDS_HORZ | HDS_FULLDRAG;
+    headerStyle = HDS_HORZ | HDS_FULLDRAG | HDS_FLAT;
 
     if (!(Context->Style & TN_STYLE_NO_COLUMN_SORT))
         headerStyle |= HDS_BUTTONS;
@@ -422,12 +428,14 @@ BOOLEAN PhTnpOnCreate(
         0,
         hwnd,
         NULL,
-        CreateStruct->hInstance,
+        NULL,
         NULL
         )))
     {
         return FALSE;
     }
+
+    PhThemeInitializeHeaderControl(Context->FixedHeaderHandle);
 
     if (!(Context->Style & TN_STYLE_NO_COLUMN_REORDER))
         headerStyle |= HDS_DRAGDROP;
@@ -442,15 +450,17 @@ BOOLEAN PhTnpOnCreate(
         0,
         hwnd,
         NULL,
-        CreateStruct->hInstance,
+        NULL,
         NULL
         )))
     {
         return FALSE;
     }
 
+    PhThemeInitializeHeaderControl(Context->HeaderHandle);
+
     if (!(Context->VScrollHandle = CreateWindow(
-        L"SCROLLBAR",
+        WC_SCROLLBAR,
         NULL,
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SBS_VERT,
         0,
@@ -459,7 +469,7 @@ BOOLEAN PhTnpOnCreate(
         0,
         hwnd,
         NULL,
-        CreateStruct->hInstance,
+        NULL,
         NULL
         )))
     {
@@ -467,7 +477,7 @@ BOOLEAN PhTnpOnCreate(
     }
 
     if (!(Context->HScrollHandle = CreateWindow(
-        L"SCROLLBAR",
+        WC_SCROLLBAR,
         NULL,
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | SBS_HORZ,
         0,
@@ -476,7 +486,7 @@ BOOLEAN PhTnpOnCreate(
         0,
         hwnd,
         NULL,
-        CreateStruct->hInstance,
+        NULL,
         NULL
         )))
     {
@@ -484,7 +494,7 @@ BOOLEAN PhTnpOnCreate(
     }
 
     if (!(Context->FillerBoxHandle = CreateWindow(
-        L"STATIC",
+        WC_STATIC,
         NULL,
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
         0,
@@ -493,7 +503,7 @@ BOOLEAN PhTnpOnCreate(
         0,
         hwnd,
         NULL,
-        CreateStruct->hInstance,
+        NULL,
         NULL
         )))
     {
@@ -2724,6 +2734,8 @@ LONG PhTnpInsertColumnHeader(
 
     Column->Visible = TRUE;
 
+    item.fmt |= HDF_OWNERDRAW;
+
     if (Column->Fixed)
         return Header_InsertItem(Context->FixedHeaderHandle, 0, &item);
     else
@@ -4922,7 +4934,7 @@ VOID PhTnpPaint(
     LONG normalUpdateRightIndex;
     LONG normalTotalX;
     RECT cellRect;
-    HBRUSH backBrush;
+//    HBRUSH backBrush;
     HRGN oldClipRegion;
 
     PhTnpInitializeThemeData(Context);
@@ -5015,23 +5027,113 @@ VOID PhTnpPaint(
             // Non-themed background
             if (Context->HasFocus)
             {
-                SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-                backBrush = GetSysColorBrush(COLOR_HIGHLIGHT);
+                //SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+                //backBrush = GetSysColorBrush(COLOR_HIGHLIGHT);
             }
             else
             {
-                SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
-                backBrush = GetSysColorBrush(COLOR_BTNFACE);
+                //SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
+                //backBrush = GetSysColorBrush(COLOR_BTNFACE);
             }
         }
         else
         {
-            SetTextColor(hdc, node->s.DrawForeColor);
-            SetDCBrushColor(hdc, node->s.DrawBackColor);
-            backBrush = GetStockObject(DC_BRUSH);
+            //SetTextColor(hdc, node->s.DrawForeColor);
+            //SetDCBrushColor(hdc, node->s.DrawBackColor);
+            //backBrush = GetStockObject(DC_BRUSH);
         }
 
-        FillRect(hdc, &rowRect, backBrush);
+        switch (Context->DarkThemeActive)
+        {
+        case 0:
+            SetTextColor(hdc, RGB(0x0, 0x0, 0x0));
+            SetDCBrushColor(hdc, RGB(0xff, 0xff, 0xff));
+            FillRect(hdc, &rowRect, GetStockObject(DC_BRUSH));
+            break;
+        case 1:
+            SetTextColor(hdc, RGB(0xff, 0xff, 0xff));
+            SetDCBrushColor(hdc, RGB(30, 30, 30));
+            FillRect(hdc, &rowRect, GetStockObject(DC_BRUSH));
+            break;
+        }
+
+
+        HDC tempDc;
+        BITMAPINFOHEADER header;
+        HBITMAP bitmap;
+        HBITMAP oldBitmap;
+        PVOID bits;
+        RECT tempRect;
+        BLENDFUNCTION blendFunction;
+
+        tempDc = CreateCompatibleDC(hdc);
+
+        if (tempDc)
+        {
+            memset(&header, 0, sizeof(BITMAPINFOHEADER));
+            header.biSize = sizeof(BITMAPINFOHEADER);
+            header.biWidth = 1;
+            header.biHeight = 1;
+            header.biPlanes = 1;
+            header.biBitCount = 24;
+            bitmap = CreateDIBSection(tempDc, (BITMAPINFO *)&header, DIB_RGB_COLORS, &bits, NULL, 0);
+
+            if (bitmap)
+            {
+                // Draw the outline of the selection rectangle.
+                //FrameRect(hdc, &rowRect, GetSysColorBrush(COLOR_HIGHLIGHT));
+
+                // Fill in the selection rectangle.
+                oldBitmap = SelectObject(tempDc, bitmap);
+                tempRect.left = 0;
+                tempRect.top = 0;
+                tempRect.right = 1;
+                tempRect.bottom = 1;
+
+                SetTextColor(tempDc, node->s.DrawForeColor);
+
+                if (node->s.DrawBackColor != 16777215)
+                {
+                    SetDCBrushColor(tempDc, node->s.DrawBackColor);
+                    FillRect(tempDc, &tempRect, GetStockObject(DC_BRUSH));
+                }
+                else
+                {
+                    SetDCBrushColor(tempDc, RGB(30, 30, 30));
+                    FillRect(tempDc, &tempRect, GetStockObject(DC_BRUSH));
+                }
+
+                blendFunction.BlendOp = AC_SRC_OVER;
+                blendFunction.BlendFlags = 0;
+                blendFunction.SourceConstantAlpha = 96;
+                blendFunction.AlphaFormat = 0;
+
+                GdiAlphaBlend(
+                    hdc,
+                    rowRect.left,
+                    rowRect.top,
+                    rowRect.right - rowRect.left,
+                    rowRect.bottom - rowRect.top,
+                    tempDc,
+                    0,
+                    0,
+                    1,
+                    1,
+                    blendFunction
+                    );
+
+                //drewWithAlpha = TRUE;
+
+                SelectObject(tempDc, oldBitmap);
+                DeleteObject(bitmap);
+            }
+
+            DeleteDC(tempDc);
+        }
+
+
+
+        //FillRect(hdc, &rowRect, backBrush);
 
         if (Context->ThemeHasItemBackground)
         {
@@ -5128,7 +5230,20 @@ VOID PhTnpPaint(
     {
         // Fill the rest of the space on the bottom with the window color.
         rowRect.bottom = viewRect.bottom;
-        FillRect(hdc, &rowRect, GetSysColorBrush(COLOR_WINDOW));
+
+        switch (Context->DarkThemeActive)
+        {
+        case 0:
+            SetTextColor(hdc, RGB(0x0, 0x0, 0x0));
+            SetDCBrushColor(hdc, RGB(0xff, 0xff, 0xff));
+            FillRect(hdc, &rowRect, GetStockObject(DC_BRUSH));
+            break;
+        case 1:
+            SetTextColor(hdc, RGB(0xff, 0xff, 0xff));
+            SetDCBrushColor(hdc, RGB(30, 30, 30));
+            FillRect(hdc, &rowRect, GetStockObject(DC_BRUSH));
+            break;
+        }
     }
 
     if (normalTotalX < viewRect.right && viewRect.right > PaintRect->left && normalTotalX < PaintRect->right)
@@ -5138,7 +5253,20 @@ VOID PhTnpPaint(
         rowRect.top = Context->HeaderHeight;
         rowRect.right = viewRect.right;
         rowRect.bottom = viewRect.bottom;
-        FillRect(hdc, &rowRect, GetSysColorBrush(COLOR_WINDOW));
+
+        switch (Context->DarkThemeActive)
+        {
+        case 0:
+            SetTextColor(hdc, RGB(0x0, 0x0, 0x0));
+            SetDCBrushColor(hdc, RGB(0xff, 0xff, 0xff));
+            FillRect(hdc, &rowRect, GetStockObject(DC_BRUSH));
+            break;
+        case 1:
+            SetTextColor(hdc, RGB(0xff, 0xff, 0xff));
+            SetDCBrushColor(hdc, RGB(30, 30, 30));
+            FillRect(hdc, &rowRect, GetStockObject(DC_BRUSH));
+            break;
+        }
     }
 
     if (Context->FlatList->Count == 0 && Context->EmptyText.Length != 0)
@@ -5697,7 +5825,7 @@ VOID PhTnpDrawThemedBorder(
     ExcludeClipRect(hdc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
 
     // Draw the themed border.
-    DrawThemeBackground(Context->ThemeData, hdc, 0, 0, &windowRect, NULL);
+    //DrawThemeBackground(Context->ThemeData, hdc, 0, 0, &windowRect, NULL);
 
     // Calculate the size of the border we just drew, and fill in the rest of the space if we didn't
     // fully paint the region.
@@ -5719,7 +5847,9 @@ VOID PhTnpDrawThemedBorder(
         windowRect.top += Context->SystemEdgeY - borderY;
         windowRect.right -= Context->SystemEdgeX - borderX;
         windowRect.bottom -= Context->SystemEdgeY - borderY;
-        FillRect(hdc, &windowRect, GetSysColorBrush(COLOR_WINDOW));
+
+        SetDCBrushColor(hdc, RGB(128, 128, 128));
+        FillRect(hdc, &windowRect, GetStockObject(DC_BRUSH));
     }
 }
 

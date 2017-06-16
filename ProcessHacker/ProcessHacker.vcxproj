@@ -336,6 +336,7 @@
     <ClCompile Include="syssccpu.c" />
     <ClCompile Include="sysscio.c" />
     <ClCompile Include="sysscmem.c" />
+    <ClCompile Include="theme.c" />
     <ClCompile Include="thrdlist.c" />
     <ClCompile Include="thrdprv.c" />
     <ClCompile Include="thrdstk.c" />
@@ -395,6 +396,7 @@
     <ClInclude Include="include\memprv.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="include\sysinfop.h" />
+    <ClInclude Include="theme.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ProcessHacker.def" />

@@ -23,6 +23,7 @@
 #include <phapp.h>
 #include <procprp.h>
 #include <procprpp.h>
+#include "theme.h"
 
 NTSTATUS NTAPI PhpOpenProcessTokenForPage(
     _Out_ PHANDLE Handle,
@@ -88,6 +89,8 @@ INT_PTR CALLBACK PhpProcessTokenHookProc(
                 PhDoPropPageLayout(hwndDlg);
 
                 SetProp(hwndDlg, PhMakeContextAtom(), (HANDLE)TRUE);
+
+                PhThemeInitializeWindow(hwndDlg); // HACK
             }
         }
         break;

@@ -182,12 +182,7 @@ VOID PhMwpShowProcessProperties(
 {
     PPH_PROCESS_PROPCONTEXT propContext;
 
-    propContext = PhCreateProcessPropContext(
-        NULL,
-        ProcessItem
-        );
-
-    if (propContext)
+    if (propContext = PhCreateProcessPropContext(ProcessItem))
     {
         PhShowProcessProperties(propContext);
         PhDereferenceObject(propContext);

@@ -31,6 +31,7 @@
 #include <settings.h>
 #include <sysinfo.h>
 #include <phsettings.h>
+#include "theme.h"
 
 static VOID NTAPI PerformanceUpdateHandler(
     _In_opt_ PVOID Parameter,
@@ -104,6 +105,8 @@ INT_PTR CALLBACK PhpProcessPerformanceDlgProc(
             PhSetWindowStyle(performanceContext->IoGraphHandle, WS_BORDER, WS_BORDER);
             Graph_SetTooltip(performanceContext->IoGraphHandle, TRUE);
             BringWindowToTop(performanceContext->IoGraphHandle);
+
+            PhThemeInitializeWindow(hwndDlg); // HACK
         }
         break;
     case WM_DESTROY:

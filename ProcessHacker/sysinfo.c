@@ -59,6 +59,8 @@
 #include <phsettings.h>
 #include <procprv.h>
 
+#include "theme.h"
+
 LRESULT PhSipDialogThemeDrawButton(
     _In_ LPNMTVCUSTOMDRAW drawInfo
     );
@@ -1795,139 +1797,6 @@ VOID PhSipRestoreSummaryView(
     PhSipLayoutSummaryView();
 }
 
-LRESULT PhSipDialogThemeDrawButton(
-    _In_ LPNMTVCUSTOMDRAW drawInfo
-    )
-{
-    BOOLEAN isGrayed = (drawInfo->nmcd.uItemState & CDIS_GRAYED) == CDIS_GRAYED;
-    BOOLEAN isChecked = (drawInfo->nmcd.uItemState & CDIS_CHECKED) == CDIS_CHECKED;
-    BOOLEAN isDisabled = (drawInfo->nmcd.uItemState & CDIS_DISABLED) == CDIS_DISABLED;
-    BOOLEAN isSelected = (drawInfo->nmcd.uItemState & CDIS_SELECTED) == CDIS_SELECTED;
-    BOOLEAN isHighlighted = (drawInfo->nmcd.uItemState & CDIS_HOT) == CDIS_HOT;
-    BOOLEAN isFocused = (drawInfo->nmcd.uItemState & CDIS_FOCUS) == CDIS_FOCUS;
-
-    if (drawInfo->nmcd.dwDrawStage == CDDS_PREPAINT)
-    {
-        SetBkMode(drawInfo->nmcd.hdc, TRANSPARENT);
-
-        if (isSelected)
-        {
-            SetDCBrushColor(drawInfo->nmcd.hdc, RGB(78, 78, 78)); // RGB(65, 65, 65)));
-            FillRect(drawInfo->nmcd.hdc, &drawInfo->nmcd.rc, GetStockObject(DC_BRUSH));
-            SetBkColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHT));
-            SetTextColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-        }
-        else if (isHighlighted)
-        {
-            SetDCBrushColor(drawInfo->nmcd.hdc, RGB(42, 42, 42)); // RGB(78, 78, 78));
-            FillRect(drawInfo->nmcd.hdc, &drawInfo->nmcd.rc, GetStockObject(DC_BRUSH));
-            SetBkColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHT));
-            SetTextColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-        }
-        else
-        {
-            SetDCBrushColor(drawInfo->nmcd.hdc, RGB(28, 28, 28)); // RGB(65, 65, 65));
-            FillRect(drawInfo->nmcd.hdc, &drawInfo->nmcd.rc, GetStockObject(DC_BRUSH));
-            SetBkColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_WINDOW));
-            SetTextColor(drawInfo->nmcd.hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-        }
-    }
-
-    return CDRF_DODEFAULT;
-}
-
-LRESULT CALLBACK PhSipDialogHookWndProc(
-    _In_ HWND hwnd,
-    _In_ UINT uMsg,
-    _In_ WPARAM wParam,
-    _In_ LPARAM lParam,
-    _In_ UINT_PTR uIdSubclass,
-    _In_ ULONG_PTR dwRefData
-    )
-{
-    PPH_SYSINFO_SECTION section = (PPH_SYSINFO_SECTION)dwRefData;
-
-    switch (uMsg)
-    {
-    case WM_DESTROY:
-        RemoveWindowSubclass(hwnd, PhSipGraphHookWndProc, uIdSubclass);
-        break;
-    case WM_NOTIFY:
-        {
-            LPNMHDR data = (LPNMHDR)lParam;
-
-            switch (data->code)
-            {
-            case NM_CUSTOMDRAW:
-                {
-                    SetWindowLongPtr(hwnd, DWLP_MSGRESULT, PhSipDialogThemeDrawButton((LPNMTVCUSTOMDRAW)lParam));
-                    return TRUE;
-                }
-                break;
-            }
-        }
-        break;
-    case WM_CTLCOLORBTN:
-    case WM_CTLCOLORDLG:
-    case WM_CTLCOLORSTATIC:
-        {
-            SetBkMode((HDC)wParam, TRANSPARENT);
-
-            switch (PhCsGraphColorMode)
-            {
-            case 0: // New colors
-                SetTextColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
-                SetDCBrushColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
-                break;
-            case 1: // Old colors
-                SetTextColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
-                SetDCBrushColor((HDC)wParam, RGB(30, 30, 30));
-                break;
-            }
-
-            return (INT_PTR)GetStockObject(DC_BRUSH);
-        }
-        break;
-    }
-
-    return DefSubclassProc(hwnd, uMsg, wParam, lParam);
-}
-
-BOOL CALLBACK PhpSectionWindowsEnumWindowsProc(
-    _In_ HWND WindowHandle,
-    _In_ LPARAM lParam
-    )
-{
-    PPH_SYSINFO_SECTION context = (PPH_SYSINFO_SECTION)lParam;
-    WCHAR className[256];
-
-    if (!GetClassName(WindowHandle, className, ARRAYSIZE(className)))
-        className[0] = 0;
-
-    if (PhEqualStringZ(className, L"#32770", FALSE))
-    {
-        SetWindowSubclass(
-            WindowHandle, 
-            PhSipDialogHookWndProc, 
-            0, 
-            (ULONG_PTR)context
-            );
-
-        PhEnumChildWindows(
-            WindowHandle, 
-            0x1000, 
-            PhpSectionWindowsEnumWindowsProc, 
-            (LPARAM)context
-            );
-    } 
-    else if (PhEqualStringZ(className, L"Button", FALSE))
-    {
-        ULONG windowStyle = (ULONG)GetWindowLongPtr(PhSipWindow, GWL_STYLE);
-    }
-
-    return TRUE;
-}
-
 VOID PhSipCreateSectionDialog(
     _In_ PPH_SYSINFO_SECTION Section
     )
@@ -1949,19 +1818,7 @@ VOID PhSipCreateSectionDialog(
                 createDialog.Parameter
                 );
 
-            SetWindowSubclass(
-                Section->DialogHandle, 
-                PhSipDialogHookWndProc, 
-                0, 
-                (ULONG_PTR)Section
-                );
-
-            PhEnumChildWindows(
-                Section->DialogHandle, 
-                0x1000, 
-                PhpSectionWindowsEnumWindowsProc, 
-                (LPARAM)Section
-                );
+            PhThemeInitializeWindow(Section->DialogHandle);
         }
     }
 }

@@ -39,6 +39,7 @@
 #include <procprv.h>
 #include <settings.h>
 #include <verify.h>
+#include "theme.h"
 
 static PH_STRINGREF EmptyModulesText = PH_STRINGREF_INIT(L"There are no modules to display.");
 
@@ -491,7 +492,7 @@ INT_PTR CALLBACK PhpProcessModulesDlgProc(
             PhSetEnabledProvider(&modulesContext->ProviderRegistration, TRUE);
             PhBoostProvider(&modulesContext->ProviderRegistration, NULL);
 
-            EnableThemeDialogTexture(hwndDlg, ETDT_ENABLETAB);
+            PhThemeInitializeWindow(hwndDlg); // HACK
         }
         break;
     case WM_DESTROY:

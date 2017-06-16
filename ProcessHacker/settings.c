@@ -54,7 +54,6 @@ VOID PhAddDefaultSettings(
     PhpAddScalableIntegerPairSetting(L"FindObjWindowSize", L"@96|550,420");
     PhpAddIntegerSetting(L"FirstRun", L"1");
     PhpAddStringSetting(L"Font", L""); // null
-    PhpAddIntegerSetting(L"ForceNoParent", L"0");
     PhpAddStringSetting(L"HandleTreeListColumns", L"");
     PhpAddStringSetting(L"HandleTreeListSort", L"0,1"); // 0, AscendingSortOrder
     PhpAddStringSetting(L"HiddenProcessesListViewColumns", L"");
@@ -203,7 +202,6 @@ VOID PhUpdateCachedSettings(
     #define PH_UPDATE_SETTING(Name) (PhCs##Name = PhGetIntegerSetting(L#Name))
     
     PH_UPDATE_SETTING(CollapseServicesOnStart);
-    PH_UPDATE_SETTING(ForceNoParent);
     PH_UPDATE_SETTING(HighlightingDuration);
     PH_UPDATE_SETTING(PropagateCpuUsage);
     PH_UPDATE_SETTING(ScrollToNewProcesses);

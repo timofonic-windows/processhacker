@@ -29,6 +29,7 @@
 #include <procprv.h>
 #include <windowsx.h>
 #include <uxtheme.h>
+#include "theme.h"
 
 typedef struct _EDIT_ENV_DIALOG_CONTEXT
 {
@@ -199,7 +200,7 @@ INT_PTR CALLBACK PhpProcessEnvironmentDlgProc(
             EnableWindow(GetDlgItem(hwndDlg, IDC_EDIT), FALSE);
             EnableWindow(GetDlgItem(hwndDlg, IDC_DELETE), FALSE);
 
-            EnableThemeDialogTexture(hwndDlg, ETDT_ENABLETAB);
+            PhThemeInitializeWindow(hwndDlg);
 
             PhpRefreshEnvironment(hwndDlg, environmentContext, processItem);
         }

@@ -12,7 +12,6 @@
 #endif
 
 EXT ULONG PhCsCollapseServicesOnStart;
-EXT ULONG PhCsForceNoParent;
 EXT ULONG PhCsHighlightingDuration;
 EXT ULONG PhCsPropagateCpuUsage;
 EXT ULONG PhCsScrollToNewProcesses;

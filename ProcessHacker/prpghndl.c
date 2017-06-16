@@ -39,6 +39,7 @@
 #include <phplug.h>
 #include <procprv.h>
 #include <settings.h>
+#include "theme.h"
 
 static PH_STRINGREF EmptyHandlesText = PH_STRINGREF_INIT(L"There are no handles to display.");
 
@@ -419,6 +420,8 @@ INT_PTR CALLBACK PhpProcessHandlesDlgProc(
 
             PhSetEnabledProvider(&handlesContext->ProviderRegistration, TRUE);
             PhBoostProvider(&handlesContext->ProviderRegistration, NULL);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:
