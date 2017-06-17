@@ -192,6 +192,8 @@ VOID RebarLoadSettings(
             NULL,
             NULL
             );
+
+        PhThemeInitializeStatusbarControl(StatusBarHandle);
     }
 
     // Hide or show controls (Note: don't unload or remove at runtime).
