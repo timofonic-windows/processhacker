@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Process Hacker.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <phtheme.h>
-#include <phapp.h>
 
+#include <phapp.h>
+#include <phtheme.h>
 #include <windowsx.h>
 
 #include <secedit.h>
