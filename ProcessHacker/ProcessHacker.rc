@@ -111,11 +111,11 @@ BEGIN
         MENUITEM "System &information\aCtrl+I", ID_VIEW_SYSTEMINFORMATION
         POPUP "&Tray icons"
         BEGIN
-            MENUITEM "CPU &history",                 ID_TRAYICONS_CPUHISTORY
-            MENUITEM "CPU &usage",                   ID_TRAYICONS_CPUUSAGE
-            MENUITEM "&I/O history",                 ID_TRAYICONS_IOHISTORY
-            MENUITEM "&Commit charge history",       ID_TRAYICONS_COMMITHISTORY
-            MENUITEM "&Physical memory history",     ID_TRAYICONS_PHYSICALMEMORYHISTORY
+            MENUITEM "CPU &history",                ID_TRAYICONS_CPUHISTORY
+            MENUITEM "CPU &usage",                  ID_TRAYICONS_CPUUSAGE
+            MENUITEM "&I/O history",                ID_TRAYICONS_IOHISTORY
+            MENUITEM "&Commit charge history",      ID_TRAYICONS_COMMITHISTORY
+            MENUITEM "&Physical memory history",    ID_TRAYICONS_PHYSICALMEMORYHISTORY
         END
         MENUITEM SEPARATOR
         MENUITEM "<section placeholder>",       ID_VIEW_SECTIONPLACEHOLDER
@@ -152,11 +152,8 @@ BEGIN
         MENUITEM "Hidden processes",            ID_TOOLS_HIDDENPROCESSES
         MENUITEM "Inspect executable file...",  ID_TOOLS_INSPECTEXECUTABLEFILE
         MENUITEM "Pagefiles",                   ID_TOOLS_PAGEFILES
-        MENUITEM "Start &Task Manager",          ID_TOOLS_STARTTASKMANAGER
-    END
-    POPUP "&Users"
-    BEGIN
-        MENUITEM "Dummy",                       ID_USERS_DUMMY
+        MENUITEM "Start &Task Manager",         ID_TOOLS_STARTTASKMANAGER
+        MENUITEM SEPARATOR
     END
     POPUP "H&elp"
     BEGIN
@@ -301,9 +298,9 @@ BEGIN
                 MENUITEM "Low",                         ID_PAGEPRIORITY_LOW
                 MENUITEM "Very low",                    ID_PAGEPRIORITY_VERYLOW
             END
-            MENUITEM "Reduce working &set",          ID_MISCELLANEOUS_REDUCEWORKINGSET
-            MENUITEM "&Run as...",                   ID_MISCELLANEOUS_RUNAS
-            MENUITEM "Run &as this user...",         ID_MISCELLANEOUS_RUNASTHISUSER
+            MENUITEM "Reduce working &set",         ID_MISCELLANEOUS_REDUCEWORKINGSET
+            MENUITEM "&Run as...",                  ID_MISCELLANEOUS_RUNAS
+            MENUITEM "Run &as this user...",        ID_MISCELLANEOUS_RUNASTHISUSER
         END
         POPUP "&Window"
         BEGIN
@@ -361,19 +358,6 @@ BEGIN
         MENUITEM "Go to owning &process",       ID_OBJECT_GOTOOWNINGPROCESS
         MENUITEM "Prope&rties",                 ID_OBJECT_PROPERTIES
         MENUITEM "&Copy\aCtrl+C",               ID_OBJECT_COPY
-    END
-END
-
-IDR_USER MENU
-BEGIN
-    POPUP "User"
-    BEGIN
-        MENUITEM "&Connect",                    ID_USER_CONNECT
-        MENUITEM "&Disconnect",                 ID_USER_DISCONNECT
-        MENUITEM "&Logoff",                     ID_USER_LOGOFF
-        MENUITEM "Rem&ote control",             ID_USER_REMOTECONTROL
-        MENUITEM "Send &message...",            ID_USER_SENDMESSAGE
-        MENUITEM "P&roperties",                 ID_USER_PROPERTIES
     END
 END
 

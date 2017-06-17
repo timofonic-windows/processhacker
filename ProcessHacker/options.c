@@ -872,6 +872,8 @@ INT_PTR CALLBACK PhpOptionsAdvancedDlgProc(
                 EnableWindow(GetDlgItem(hwndDlg, IDC_SAMPLECOUNT), FALSE);
                 EnableWindow(GetDlgItem(hwndDlg, IDC_SAMPLECOUNTAUTOMATIC), FALSE);
             }
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:
@@ -955,6 +957,8 @@ INT_PTR CALLBACK PhpOptionsSymbolsDlgProc(
             SetDlgItemText(hwndDlg, IDC_DBGHELPSEARCHPATH, PhaGetStringSetting(L"DbgHelpSearchPath")->Buffer);
 
             SetDlgItemCheckForSetting(hwndDlg, IDC_UNDECORATESYMBOLS, L"DbgHelpUndecorate");
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_COMMAND:
@@ -1107,6 +1111,8 @@ INT_PTR CALLBACK PhpOptionsHighlightingDlgProc(
                 ColorItems[i].CurrentUse = !!PhGetIntegerSetting(ColorItems[i].UseSettingName);
                 ListView_SetCheckState(HighlightingListViewHandle, lvItemIndex, ColorItems[i].CurrentUse);
             }
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_COMMAND:
@@ -1227,6 +1233,8 @@ INT_PTR CALLBACK PhpOptionsGraphsDlgProc(
             ColorBox_SetColor(GetDlgItem(hwndDlg, IDC_IOW), PhCsColorIoWrite);
             ColorBox_SetColor(GetDlgItem(hwndDlg, IDC_PRIVATE), PhCsColorPrivate);
             ColorBox_SetColor(GetDlgItem(hwndDlg, IDC_PHYSICAL), PhCsColorPhysical);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_NOTIFY:

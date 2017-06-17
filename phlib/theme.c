@@ -399,7 +399,7 @@ LRESULT CALLBACK PhpHeaderWndSubclassProc(
         break;
     case WM_PAINT:
         {
-            HTHEME hTheme = OpenThemeData(hWnd, L"HEADER");
+            //HTHEME hTheme = OpenThemeData(hWnd, L"HEADER");
 
             WCHAR szText[MAX_PATH + 1];
             RECT rcClient;
@@ -505,7 +505,7 @@ LRESULT CALLBACK PhpHeaderWndSubclassProc(
                     tcItem.pszText,
                     -1,
                     &headerRect,
-                    DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_HIDEPREFIX //| DT_WORD_ELLIPSIS
+                    DT_VCENTER | DT_SINGLELINE | DT_HIDEPREFIX //| DT_WORD_ELLIPSIS
                     );
             }
   
@@ -516,7 +516,6 @@ LRESULT CALLBACK PhpHeaderWndSubclassProc(
             DeleteDC(hdc);
             DeleteObject(hbm);
             EndPaint(hWnd, &ps);
-            CloseThemeData(hTheme);
         }
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
     }

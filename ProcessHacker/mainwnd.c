@@ -87,10 +87,9 @@ static PPH_MAIN_TAB_PAGE CurrentPage;
 static INT OldTabIndex;
 static HFONT CurrentCustomFont;
 
-static HMENU SubMenuHandles[5];
-static PPH_EMENU SubMenuObjects[5];
+static HMENU SubMenuHandles[4];
+static PPH_EMENU SubMenuObjects[4];
 static PPH_LIST LegacyAddMenuItemList;
-static BOOLEAN UsersMenuInitialized = FALSE;
 
 static PH_CALLBACK_REGISTRATION SymInitRegistration;
 
@@ -321,9 +320,6 @@ LRESULT CALLBACK PhMwpWndProc(
             if (PhMwpOnNotify((NMHDR *)lParam, &result))
                 return result;
         }
-        break;
-    case WM_WTSSESSION_CHANGE:
-        PhMwpOnWtsSessionChange((ULONG)wParam, (ULONG)lParam);
         break;
     case WM_MEASUREITEM:
         PhThemeWindowMeasureItem((LPMEASUREITEMSTRUCT)lParam);
@@ -1661,20 +1657,9 @@ VOID PhMwpOnInitMenuPopup(
     if (!found)
         return;
 
-    if (Index == 3)
-    {
-        // Special case for Users menu.
-        if (!UsersMenuInitialized)
-        {
-            PhMwpUpdateUsersMenu();
-            UsersMenuInitialized = TRUE;
-        }
-
-        return;
-    }
-
     // Delete all items in this submenu.
-    while (DeleteMenu(Menu, 0, MF_BYPOSITION)) ;
+    while (DeleteMenu(Menu, 0, MF_BYPOSITION)) 
+        NOTHING;
 
     // Delete the previous EMENU for this submenu.
     if (SubMenuObjects[Index])
@@ -1883,20 +1868,6 @@ BOOLEAN PhMwpOnNotify(
     }
 
     return FALSE;
-}
-
-VOID PhMwpOnWtsSessionChange(
-    _In_ ULONG Reason,
-    _In_ ULONG SessionId
-    )
-{
-    if (Reason == WTS_SESSION_LOGON || Reason == WTS_SESSION_LOGOFF)
-    {
-        if (UsersMenuInitialized)
-        {
-            PhMwpUpdateUsersMenu();
-        }
-    }
 }
 
 ULONG_PTR PhMwpOnUserMessage(
@@ -2576,7 +2547,11 @@ VOID PhMwpDispatchMenuCommand(
     case ID_USER_SENDMESSAGE:
     case ID_USER_PROPERTIES:
         {
-            SelectedUserSessionId = (ULONG)ItemData;
+            PPH_EMENU_ITEM menuItem;
+
+            menuItem = (PPH_EMENU_ITEM)ItemData;
+
+            SelectedUserSessionId = PtrToUlong(menuItem->Context);
         }
         break;
     }
@@ -2800,6 +2775,64 @@ VOID PhMwpInitializeSubMenu(
                     menuItem->Flags |= MFT_OWNERDRAW;
                     menuItem->Bitmap = shieldBitmap;
                 }
+            }
+        }
+
+        // Users
+        {
+            PSESSIONIDW sessions;
+            ULONG numberOfSessions;
+            ULONG i;
+            PPH_EMENU_ITEM subMenu;
+
+            PhInsertEMenuItem(Menu, subMenu = PhCreateEMenuItem(0, 0, L"Users", NULL, NULL), -1);
+
+            if (WinStationEnumerateW(NULL, &sessions, &numberOfSessions))
+            {
+                for (i = 0; i < numberOfSessions; i++)
+                {
+                    PPH_EMENU_ITEM actionMenu;
+                    PPH_STRING menuText;
+                    PPH_STRING escapedMenuText;
+                    WINSTATIONINFORMATION winStationInfo;
+                    ULONG returnLength;
+
+                    if (!WinStationQueryInformationW(
+                        NULL,
+                        sessions[i].SessionId,
+                        WinStationInformation,
+                        &winStationInfo,
+                        sizeof(WINSTATIONINFORMATION),
+                        &returnLength
+                        ))
+                    {
+                        winStationInfo.Domain[0] = 0;
+                        winStationInfo.UserName[0] = 0;
+                    }
+
+                    if (winStationInfo.Domain[0] == 0 || winStationInfo.UserName[0] == 0)
+                    {
+                        // Probably the Services or RDP-Tcp session.
+                        continue;
+                    }
+
+                    menuText = PhaFormatString(L"%u: %s\\%s",
+                        sessions[i].SessionId,
+                        winStationInfo.Domain,
+                        winStationInfo.UserName
+                        );
+                    escapedMenuText = PH_AUTO(PhEscapeStringForMenuPrefix(&menuText->sr));
+             
+                    PhInsertEMenuItem(subMenu, actionMenu = PhCreateEMenuItem(0, 0, escapedMenuText->Buffer, NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                    PhInsertEMenuItem(actionMenu, PhCreateEMenuItem(0, ID_USER_CONNECT, L"&Connect", NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                    PhInsertEMenuItem(actionMenu, PhCreateEMenuItem(0, ID_USER_DISCONNECT, L"&Disconnect", NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                    PhInsertEMenuItem(actionMenu, PhCreateEMenuItem(0, ID_USER_LOGOFF, L"&Logoff", NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                    PhInsertEMenuItem(actionMenu, PhCreateEMenuItem(0, ID_USER_REMOTECONTROL, L"Rem&ote control", NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                    PhInsertEMenuItem(actionMenu, PhCreateEMenuItem(0, ID_USER_SENDMESSAGE, L"Send &message...", NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                    PhInsertEMenuItem(actionMenu, PhCreateEMenuItem(0, ID_USER_PROPERTIES, L"P&roperties", NULL, UlongToPtr(sessions[i].SessionId)), -1);
+                }
+
+                WinStationFreeMemory(sessions);
             }
         }
     }
@@ -3582,87 +3615,4 @@ BOOLEAN PhMwpPluginNotifyEvent(
     PhInvokeCallback(PhGetGeneralCallback(GeneralCallbackNotifyEvent), &notifyEvent);
 
     return notifyEvent.Handled;
-}
-
-VOID PhMwpUpdateUsersMenu(
-    VOID
-    )
-{
-    HMENU menu;
-    PSESSIONIDW sessions;
-    ULONG numberOfSessions;
-    ULONG i;
-    ULONG j;
-    MENUITEMINFO menuItemInfo = { sizeof(MENUITEMINFO) };
-
-    menu = SubMenuHandles[3];
-
-    // Delete all items in the Users menu.
-    while (DeleteMenu(menu, 0, MF_BYPOSITION)) ;
-
-    if (WinStationEnumerateW(NULL, &sessions, &numberOfSessions))
-    {
-        for (i = 0; i < numberOfSessions; i++)
-        {
-            HMENU userMenu;
-            PPH_STRING menuText;
-            PPH_STRING escapedMenuText;
-            WINSTATIONINFORMATION winStationInfo;
-            ULONG returnLength;
-            ULONG numberOfItems;
-
-            if (!WinStationQueryInformationW(
-                NULL,
-                sessions[i].SessionId,
-                WinStationInformation,
-                &winStationInfo,
-                sizeof(WINSTATIONINFORMATION),
-                &returnLength
-                ))
-            {
-                winStationInfo.Domain[0] = 0;
-                winStationInfo.UserName[0] = 0;
-            }
-
-            if (winStationInfo.Domain[0] == 0 || winStationInfo.UserName[0] == 0)
-            {
-                // Probably the Services or RDP-Tcp session.
-                continue;
-            }
-
-            menuText = PhFormatString(
-                L"%u: %s\\%s",
-                sessions[i].SessionId,
-                winStationInfo.Domain,
-                winStationInfo.UserName
-                );
-            escapedMenuText = PhEscapeStringForMenuPrefix(&menuText->sr);
-            PhDereferenceObject(menuText);
-
-            userMenu = GetSubMenu(LoadMenu(PhInstanceHandle, MAKEINTRESOURCE(IDR_USER)), 0);
-            AppendMenu(
-                menu,
-                MF_STRING | MF_POPUP,
-                (UINT_PTR)userMenu,
-                escapedMenuText->Buffer
-                );
-
-            PhDereferenceObject(escapedMenuText);
-
-            menuItemInfo.fMask = MIIM_DATA;
-            menuItemInfo.dwItemData = sessions[i].SessionId;
-
-            numberOfItems = GetMenuItemCount(userMenu);
-
-            if (numberOfItems != -1)
-            {
-                for (j = 0; j < numberOfItems; j++)
-                    SetMenuItemInfo(userMenu, j, TRUE, &menuItemInfo);
-            }
-        }
-
-        WinStationFreeMemory(sessions);
-    }
-
-    DrawMenuBar(PhMainWndHandle);
 }

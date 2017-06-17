@@ -34,6 +34,7 @@
 #include <procprv.h>
 #include <srvprv.h>
 #include <thrdprv.h>
+#include "phtheme.h"
 
 static INT_PTR CALLBACK PhpAboutDlgProc(
     _In_ HWND hwndDlg,
@@ -84,6 +85,8 @@ static INT_PTR CALLBACK PhpAboutDlgProc(
                 );
 
             SendMessage(hwndDlg, WM_NEXTDLGCTL, (LPARAM)GetDlgItem(hwndDlg, IDOK), TRUE);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_COMMAND:
