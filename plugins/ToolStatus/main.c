@@ -904,9 +904,21 @@ LRESULT CALLBACK MainWndSubclassProc(
                         switch (customDraw->nmcd.dwDrawStage)
                         {
                         case CDDS_PREPAINT:
-                            SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                            SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                            FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                            {
+                                switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                {
+                                case 0: // New colors
+                                    SetTextColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                case 1: // Old colors
+                                    SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                }
+                            }
                             return CDRF_NOTIFYITEMDRAW;
                         case CDDS_ITEMPREPAINT:
                             {
@@ -932,11 +944,19 @@ LRESULT CALLBACK MainWndSubclassProc(
                                 );
                                 }*/
 
-                                SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                                FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
-
+                                switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                {
+                                case 0: // New colors
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                case 1: // Old colors
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                }
+                   
                                 //if (newFont)
-                                SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
+                                //SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
 
                                 //if (colorChanged)
                                 //{
@@ -946,8 +966,9 @@ LRESULT CALLBACK MainWndSubclassProc(
                                 //        customDraw->clrText = RGB(0xff, 0xff, 0xff);
                                 //}
                                 customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                customDraw->clrFace = RGB(0xff, 0, 0);
 
-                                return CDRF_DODEFAULT;
+                                return CDRF_NEWFONT;
                             }
                             break;
                         }
@@ -969,10 +990,21 @@ LRESULT CALLBACK MainWndSubclassProc(
                         switch (customDraw->nmcd.dwDrawStage)
                         {
                         case CDDS_PREPAINT:
-                            SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                            SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                            FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
-
+                            {
+                                switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                {
+                                case 0: // New colors
+                                    SetTextColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                case 1: // Old colors
+                                    SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                }
+                            }
                             return CDRF_NOTIFYITEMDRAW;
                         case CDDS_ITEMPREPAINT:
                             {
@@ -997,10 +1029,21 @@ LRESULT CALLBACK MainWndSubclassProc(
                                         context->Context
                                     );
                                 }*/
-                                SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                                SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                                FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
 
+                                switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                {
+                                case 0: // New colors
+                                    //SetTextColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
+                                    SetDCBrushColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                case 1: // Old colors
+                                    //SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    break;
+                                }
+                  
                                 //if (newFont)
                                 SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
 
@@ -1009,11 +1052,11 @@ LRESULT CALLBACK MainWndSubclassProc(
                                 //    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
                                         customDraw->clrText = RGB(0x00, 0x00, 0x00);
                                 //    else
-                                //        customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                        customDraw->clrText = RGB(0xff, 0xff, 0xff);
                                 //}
-                                //customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                customDraw->clrFace = RGB(0xff, 0, 0);
 
-                                return CDRF_DODEFAULT;
+                                return CDRF_NEWFONT;
                             }
                             break;
                         }

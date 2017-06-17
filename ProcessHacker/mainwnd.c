@@ -22,6 +22,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <mainwnd.h>
 
 #include <shlobj.h>
@@ -54,7 +55,6 @@
 #include <sysinfo.h>
 
 #include <mainwndp.h>
-#include "theme.h"
 
 #define RUNAS_MODE_ADMIN 1
 #define RUNAS_MODE_LIMITED 2
@@ -182,6 +182,8 @@ BOOLEAN PhMainWndInitialization(
 
     // Initialize child controls.
     PhMwpInitializeControls();
+    // Initialize child themes (main window only).
+    PhThemeInitializeWindow(PhMainWndHandle);
 
     PhMwpLoadSettings();
     PhLogInitialization();
@@ -409,7 +411,7 @@ VOID PhMwpInitializeControls(
     TabControlHandle = CreateWindow(
         WC_TABCONTROL,
         NULL,
-        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | TCS_MULTILINE | TCS_OWNERDRAWFIXED,
+        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | TCS_MULTILINE,
         0,
         0,
         3,
@@ -419,8 +421,6 @@ VOID PhMwpInitializeControls(
         PhInstanceHandle,
         NULL
         );
-
-    PhThemeInitializeTabWindow(TabControlHandle);
 
     BringWindowToTop(TabControlHandle);
 
@@ -1683,9 +1683,20 @@ VOID PhMwpOnInitMenuPopup(
     // Make sure the menu style is set correctly.
     memset(&menuInfo, 0, sizeof(MENUINFO));
     menuInfo.cbSize = sizeof(MENUINFO);
-    menuInfo.fMask = MIM_STYLE | MIM_BACKGROUND;
+    menuInfo.fMask = MIM_STYLE;
     menuInfo.dwStyle = MNS_CHECKORBMP;
-    menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28));
+    
+    switch (PhGetIntegerSetting(L"GraphColorMode"))
+    {
+    case 0: // New colors
+        //menuInfo.hbrBack = CreateSolidBrush(RGB(0x0, 0x0, 0x0));
+        break;
+    case 1: // Old colors
+        menuInfo.fMask |= MIM_BACKGROUND;
+        menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28)); // LEAK
+        break;
+    }
+
     SetMenuInfo(Menu, &menuInfo);
 
     menu = PhCreateEMenu();
@@ -2494,9 +2505,19 @@ VOID PhMwpInitializeMainMenu(
 
     memset(&menuInfo, 0, sizeof(MENUINFO));
     menuInfo.cbSize = sizeof(MENUINFO);
-    menuInfo.fMask = MIM_STYLE | MIM_BACKGROUND;
+    menuInfo.fMask = MIM_STYLE;
     menuInfo.dwStyle = MNS_NOTIFYBYPOS;
-    menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28));
+
+    switch (PhGetIntegerSetting(L"GraphColorMode"))
+    {
+    case 0: // New colors
+        //menuInfo.hbrBack = CreateSolidBrush(RGB(0x0, 0x0, 0x0));
+        break;
+    case 1: // Old colors
+        menuInfo.fMask |= MIM_BACKGROUND;
+        menuInfo.hbrBack = CreateSolidBrush(RGB(28, 28, 28)); // LEAK
+        break;
+    }
 
     SetMenuInfo(Menu, &menuInfo);
 

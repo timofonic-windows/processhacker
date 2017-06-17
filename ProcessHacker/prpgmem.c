@@ -21,6 +21,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
 
@@ -36,8 +37,6 @@
 #include <memprv.h>
 #include <phplug.h>
 #include <procprv.h>
-#include <settings.h>
-#include "theme.h"
 
 static PH_STRINGREF EmptyMemoryText = PH_STRINGREF_INIT(L"There are no memory regions to display.");
 

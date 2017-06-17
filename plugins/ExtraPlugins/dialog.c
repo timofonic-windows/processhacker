@@ -21,6 +21,7 @@
  */
 
 #include "main.h"
+#include <phtheme.h>
 
 BOOLEAN WordMatchStringRef(
     _In_ PWCT_CONTEXT Context,
@@ -264,6 +265,8 @@ INT_PTR CALLBACK CloudPluginsDlgProc(
             UpdateTreeView(context);
 
             SendMessage(hwndDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwndDlg, IDC_INSTALLED), TRUE);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_SIZE:

@@ -593,6 +593,15 @@ EXPORTS
 	PhWalkThreadStack
 	PhWriteMiniDumpProcess
 
+; theme
+	PhThemeInitializeWindow
+	PhThemeInitializeTabWindow
+	PhThemeInitializeHeaderControl
+	PhThemeInitializeStatusbarControl
+	PhThemeDrawButton
+	PhThemeWindowDrawItem
+	PhThemeWindowMeasureItem
+
 ; verify
 	PhVerifyFile
 

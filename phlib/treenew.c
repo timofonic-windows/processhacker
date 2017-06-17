@@ -42,16 +42,14 @@
  */
 
 #include <ph.h>
+#include <phtheme.h>
 #include <treenew.h>
+#include <guisup.h>
+#include <treenewp.h>
 
 #include <uxtheme.h>
 #include <vssym32.h>
 #include <windowsx.h>
-
-#include <guisup.h>
-
-#include <treenewp.h>
-#include "../ProcessHacker/theme.h"
 
 static PVOID ComCtl32Handle;
 static LONG SmallIconWidth;

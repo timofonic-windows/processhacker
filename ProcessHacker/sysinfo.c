@@ -46,6 +46,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <settings.h>
 #include <sysinfo.h>
 #include <sysinfop.h>
@@ -58,8 +59,6 @@
 #include <phplug.h>
 #include <phsettings.h>
 #include <procprv.h>
-
-#include "theme.h"
 
 LRESULT PhSipDialogThemeDrawButton(
     _In_ LPNMTVCUSTOMDRAW drawInfo
@@ -267,7 +266,7 @@ INT_PTR CALLBACK PhSipSysInfoDialogProc(
             {
             case NM_CUSTOMDRAW:
                 {
-                    SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, PhSipDialogThemeDrawButton((LPNMTVCUSTOMDRAW)lParam));
+                    SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, PhThemeDrawButton((LPNMTVCUSTOMDRAW)lParam));
                     return TRUE;
                 }
                 break;

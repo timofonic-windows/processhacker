@@ -21,6 +21,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
 
@@ -34,8 +35,6 @@
 #include <procmtgn.h>
 #include <procprv.h>
 #include <settings.h>
-
-#include "theme.h"
 
 static PWSTR ProtectedSignerStrings[] =
     { L"", L" (Authenticode)", L" (CodeGen)", L" (Antimalware)", L" (Lsa)", L" (Windows)", L" (WinTcb)", L" (WinSystem)" };

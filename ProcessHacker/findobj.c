@@ -24,6 +24,7 @@
 
 #include <windowsx.h>
 
+#include <phtheme.h>
 #include <emenu.h>
 #include <hndlinfo.h>
 #include <kphuser.h>
@@ -37,7 +38,6 @@
 #include <settings.h>
 
 #include "pcre/pcre2.h"
-#include "theme.h"
 
 #define WM_PH_SEARCH_UPDATE (WM_APP + 801)
 #define WM_PH_SEARCH_FINISHED (WM_APP + 802)

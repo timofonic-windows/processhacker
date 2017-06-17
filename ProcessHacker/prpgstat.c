@@ -21,11 +21,10 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
 #include <procprv.h>
-
-#include "theme.h"
 
 static VOID NTAPI StatisticsUpdateHandler(
     _In_opt_ PVOID Parameter,

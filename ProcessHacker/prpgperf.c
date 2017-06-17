@@ -21,17 +21,13 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
-
 #include <graph.h>
-#include <settings.h>
-
 #include <procprv.h>
-#include <settings.h>
 #include <sysinfo.h>
 #include <phsettings.h>
-#include "theme.h"
 
 static VOID NTAPI PerformanceUpdateHandler(
     _In_opt_ PVOID Parameter,

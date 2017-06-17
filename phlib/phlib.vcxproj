@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -185,6 +185,7 @@
     <ClCompile Include="settings.c" />
     <ClCompile Include="sha.c" />
     <ClCompile Include="sha256.c" />
+    <ClCompile Include="theme.c" />
     <ClCompile Include="util.c" />
     <ClCompile Include="svcsup.c" />
     <ClCompile Include="symprv.c" />
@@ -256,6 +257,7 @@
     <ClInclude Include="include\workqueue.h" />
     <ClInclude Include="include\workqueuep.h" />
     <ClInclude Include="sha256.h" />
+    <ClInclude Include="include\phtheme.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,6 +22,7 @@
  */
 
 #include "exttools.h"
+#include <phtheme.h>
 
 typedef struct _ET_GPU_CONTEXT
 {
@@ -479,6 +480,8 @@ INT_PTR CALLBACK EtpGpuPageDlgProc(
                 context,
                 &context->ProcessesUpdatedRegistration
                 );
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:

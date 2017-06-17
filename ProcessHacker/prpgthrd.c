@@ -21,6 +21,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
 
@@ -34,7 +35,6 @@
 #include <procprv.h>
 #include <thrdlist.h>
 #include <thrdprv.h>
-#include "theme.h"
 
 static PH_STRINGREF EmptyThreadsText = PH_STRINGREF_INIT(L"There are no threads to display.");
 

@@ -21,10 +21,8 @@
  */
 
 #include <phapp.h>
-
+#include <phtheme.h>
 #include <windowsx.h>
-
-#include <settings.h>
 
 typedef struct _COLUMNS_DIALOG_CONTEXT
 {
@@ -193,6 +191,8 @@ INT_PTR CALLBACK PhpColumnsDlgProc(
 
             SendMessage(hwndDlg, WM_COMMAND, MAKEWPARAM(IDC_INACTIVE, LBN_SELCHANGE), (LPARAM)context->InactiveList);
             SendMessage(hwndDlg, WM_COMMAND, MAKEWPARAM(IDC_ACTIVE, LBN_SELCHANGE), (LPARAM)context->ActiveList);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:

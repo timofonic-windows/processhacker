@@ -21,6 +21,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
 
@@ -31,11 +32,7 @@
 #include <settings.h>
 
 #include <phplug.h>
-#include <phsettings.h>
 #include <procprv.h>
-
-#include "mainwnd.h"
-#include "theme.h"
 
 PPH_OBJECT_TYPE PhpProcessPropContextType;
 PPH_OBJECT_TYPE PhpProcessPropPageContextType;
@@ -283,9 +280,6 @@ BOOLEAN PhpInitializePropSheetLayoutStage1(
         PPH_LAYOUT_ITEM tabPageItem;
 
         tabControlHandle = PropSheet_GetTabControl(hwnd);
-
-        PhThemeInitializeTabWindow(tabControlHandle);
-
         tabControlItem = PhAddLayoutItem(&Context->LayoutManager, tabControlHandle,  NULL, PH_ANCHOR_ALL | PH_LAYOUT_IMMEDIATE_RESIZE);
         tabPageItem = PhAddLayoutItem(&Context->LayoutManager, tabControlHandle, NULL, PH_LAYOUT_TAB_CONTROL); // dummy item to fix multiline tab control
         Context->TabPageItem = tabPageItem;

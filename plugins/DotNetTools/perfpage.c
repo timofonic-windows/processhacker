@@ -24,6 +24,7 @@
 
 #include "dn.h"
 #include "clr\perfcounterdefs.h"
+#include <phtheme.h>
 
 typedef enum _DOTNET_CATEGORY
 {
@@ -829,6 +830,8 @@ INT_PTR CALLBACK DotNetPerfPageDlgProc(
                 context,
                 &context->ProcessesUpdatedCallbackRegistration
                 );
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:

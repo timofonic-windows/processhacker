@@ -22,6 +22,7 @@
  */
 
 #include "exttools.h"
+#include <phtheme.h>
 
 static RECT NormalGraphTextMargin = { 5, 5, 5, 5 };
 static RECT NormalGraphTextPadding = { 3, 3, 3, 3 };
@@ -331,6 +332,8 @@ INT_PTR CALLBACK EtwDiskNetworkPageDlgProc(
                 context,
                 &context->ProcessesUpdatedRegistration
                 );
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:

@@ -21,15 +21,14 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
-#include <cpysave.h>
 #include <emenu.h>
 #include <settings.h>
 #include <procprv.h>
 #include <windowsx.h>
 #include <uxtheme.h>
-#include "theme.h"
 
 typedef struct _EDIT_ENV_DIALOG_CONTEXT
 {

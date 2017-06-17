@@ -176,6 +176,9 @@
     <ClCompile Include="mxml\mxml-string.c">
       <Filter>Mini-XML</Filter>
     </ClCompile>
+    <ClCompile Include="theme.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\circbuf.h">
@@ -363,6 +366,9 @@
     </ClInclude>
     <ClInclude Include="mxml\mxml.h">
       <Filter>Mini-XML\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\phtheme.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

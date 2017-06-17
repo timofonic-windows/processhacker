@@ -22,6 +22,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 
 #include <commdlg.h>
 #include <windowsx.h>
@@ -265,6 +266,7 @@ static VOID PhpPageInit(
 
         optionsWindow = GetParent(hwndDlg);
         SetWindowSubclass(optionsWindow, PhpOptionsWndProc, 0, 0);
+        PhThemeInitializeWindow(optionsWindow);
 
         // Create the Reset button.
         GetClientRect(optionsWindow, &clientRect);

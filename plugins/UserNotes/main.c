@@ -24,6 +24,7 @@
 #include "usernotes.h"
 #include <toolstatusintf.h>
 #include <commdlg.h>
+#include <phtheme.h>
 
 VOID SearchChangedHandler(
     _In_opt_ PVOID Parameter,
@@ -1598,6 +1599,8 @@ INT_PTR CALLBACK ProcessCommentPageDlgProc(
 
             if (!processItem->CommandLine)
                 EnableWindow(context->MatchCommandlineHandle, FALSE);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:

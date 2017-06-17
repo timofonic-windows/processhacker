@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Process Hacker.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <phtheme.h>
 #include <phapp.h>
 
 #include <windowsx.h>
@@ -205,6 +205,7 @@ INT_PTR CALLBACK PhpServiceGeneralDlgProc(
 
             // HACK
             PhCenterWindow(GetParent(hwndDlg), GetParent(GetParent(hwndDlg)));
+            PhThemeInitializeWindow(GetParent(hwndDlg));
 
             SetProp(hwndDlg, PhMakeContextAtom(), (HANDLE)context);
 

@@ -22,6 +22,7 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
 
@@ -39,7 +40,6 @@
 #include <procprv.h>
 #include <settings.h>
 #include <verify.h>
-#include "theme.h"
 
 static PH_STRINGREF EmptyModulesText = PH_STRINGREF_INIT(L"There are no modules to display.");
 

@@ -32,6 +32,7 @@
 #include <windowsx.h>
 
 #include <guisup.h>
+#include <phtheme.h>
 
 #define PH_MAX_COMPARE_FUNCTIONS 16
 
@@ -129,9 +130,10 @@ VOID PhSetExtendedListView(
     context->EnableRedraw = 1;
     context->Cursor = NULL;
 
-    ListView_SetBkColor(hWnd, RGB(30, 30, 30));
+    //ListView_SetBkColor(hWnd, RGB(30, 30, 30));
     ListView_SetTextBkColor(hWnd, RGB(30, 30, 30));
     ListView_SetTextColor(hWnd, RGB(0xff, 0xff, 0xff));
+    PhThemeInitializeHeaderControl((HWND)SendMessage(hWnd, LVM_GETHEADER, 0, 0));
 
     SetWindowSubclass(hWnd, PhpExtendedListViewWndProc, 0, (ULONG_PTR)context);
 

@@ -21,9 +21,9 @@
  */
 
 #include <phapp.h>
+#include <phtheme.h>
 #include <procprp.h>
 #include <procprpp.h>
-#include "theme.h"
 
 NTSTATUS NTAPI PhpOpenProcessTokenForPage(
     _Out_ PHANDLE Handle,

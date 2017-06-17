@@ -25,6 +25,7 @@
 #include "resource.h"
 #include <commonutil.h>
 #include <windowsx.h>
+#include <phtheme.h>
 
 typedef struct _WINDOWS_CONTEXT
 {
@@ -378,6 +379,8 @@ INT_PTR CALLBACK WepWindowsDlgProc(
             WepRefreshWindows(context);
 
             SendMessage(GetParent(hwndDlg), WM_NEXTDLGCTL, (WPARAM)GetDlgItem(GetParent(hwndDlg), IDCANCEL), TRUE);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:
@@ -799,6 +802,8 @@ INT_PTR CALLBACK WepWindowsPageProc(
             PhAddLayoutItem(&context->LayoutManager, GetDlgItem(hwndDlg, IDC_LIST), NULL, PH_ANCHOR_ALL);
 
             WepRefreshWindows(context);
+
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_SHOWWINDOW:
