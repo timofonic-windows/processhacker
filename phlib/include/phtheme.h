@@ -14,6 +14,13 @@ PhThemeInitializeWindow(
 PHLIBAPI
 VOID
 NTAPI
+PhThemeReInitializeWindow(
+    _In_ HWND WindowHandle
+    );
+
+PHLIBAPI
+VOID
+NTAPI
 PhThemeInitializeTabWindow(
     _In_ HWND TabWindowHandle
     );
@@ -40,14 +47,14 @@ PhThemeDrawButton(
     );
 
 PHLIBAPI
-VOID
+BOOLEAN
 NTAPI
 PhThemeWindowDrawItem(
     _In_ PDRAWITEMSTRUCT DrawInfo
     );
 
 PHLIBAPI
-VOID
+BOOLEAN
 NTAPI
 PhThemeWindowMeasureItem(
     _In_ PMEASUREITEMSTRUCT DrawInfo

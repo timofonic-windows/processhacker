@@ -230,6 +230,8 @@ VOID PhShowOptionsDialog(
                 PhSaveSettings(PhSettingsFileName->Buffer);
         }
     }
+
+    PhThemeReInitializeWindow(ParentWindowHandle);
 }
 
 INT CALLBACK PhpOptionsPropSheetProc(

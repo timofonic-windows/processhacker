@@ -479,7 +479,8 @@ HMENU PhEMenuToHMenu(
         switch (PhGetIntegerSetting(L"GraphColorMode"))
         {
         case 0: // New colors
-                //menuInfo.hbrBack = CreateSolidBrush(RGB(0x0, 0x0, 0x0));
+            menuInfo.fMask |= MIM_BACKGROUND;
+            menuInfo.hbrBack = CreateSolidBrush(RGB(0x0, 0x0, 0x0));
             break;
         case 1: // Old colors
             menuInfo.fMask |= MIM_BACKGROUND;
@@ -603,7 +604,7 @@ VOID PhEMenuToHMenu2(
         switch (PhGetIntegerSetting(L"GraphColorMode"))
         {
         case 0: // New colors
-            //menuItemInfo.fType |= MFT_OWNERDRAW;
+            menuItemInfo.fType |= MFT_OWNERDRAW;
             break;
         case 1: // Old colors
             menuItemInfo.fType |= MFT_OWNERDRAW;

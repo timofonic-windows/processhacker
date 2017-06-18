@@ -899,23 +899,23 @@ LRESULT CALLBACK MainWndSubclassProc(
                     break;
                 case NM_CUSTOMDRAW:
                     {
-                        LPNMLVCUSTOMDRAW customDraw = (LPNMLVCUSTOMDRAW)header;
+                        LPNMCUSTOMDRAW customDraw = (LPNMCUSTOMDRAW)header;
 
-                        switch (customDraw->nmcd.dwDrawStage)
+                        switch (customDraw->dwDrawStage)
                         {
                         case CDDS_PREPAINT:
                             {
                                 switch (PhGetIntegerSetting(L"GraphColorMode"))
                                 {
                                 case 0: // New colors
-                                    SetTextColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    SetTextColor(customDraw->hdc, RGB(0x0, 0x0, 0x0));
+                                    SetDCBrushColor(customDraw->hdc, RGB(0xff, 0xff, 0xff));
+                                    FillRect(customDraw->hdc, &customDraw->rc, GetStockObject(DC_BRUSH));
                                     break;
                                 case 1: // Old colors
-                                    SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    SetTextColor(customDraw->hdc, RGB(0xff, 0xff, 0xff));
+                                    SetDCBrushColor(customDraw->hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                    FillRect(customDraw->hdc, &customDraw->rc, GetStockObject(DC_BRUSH));
                                     break;
                                 }
                             }
@@ -925,50 +925,20 @@ LRESULT CALLBACK MainWndSubclassProc(
                                 BOOLEAN colorChanged = FALSE;
                                 HFONT newFont = NULL;
 
-                                /* if (context->ItemColorFunction)
-                                {
-                                customDraw->clrTextBk = context->ItemColorFunction(
-                                (INT)customDraw->nmcd.dwItemSpec,
-                                (PVOID)customDraw->nmcd.lItemlParam,
-                                context->Context
-                                );
-                                colorChanged = TRUE;
-                                }
-
-                                if (context->ItemFontFunction)
-                                {
-                                newFont = context->ItemFontFunction(
-                                (INT)customDraw->nmcd.dwItemSpec,
-                                (PVOID)customDraw->nmcd.lItemlParam,
-                                context->Context
-                                );
-                                }*/
-
                                 switch (PhGetIntegerSetting(L"GraphColorMode"))
                                 {
                                 case 0: // New colors
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    SetTextColor(customDraw->hdc, RGB(0x0, 0x0, 0x0));
+                                    SetDCBrushColor(customDraw->hdc, RGB(0x0, 0x0, 0x0));
+                                    FillRect(customDraw->hdc, &customDraw->rc, GetStockObject(DC_BRUSH));
                                 case 1: // Old colors
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    SetTextColor(customDraw->hdc, RGB(0xff, 0xff, 0xff));
+                                    SetDCBrushColor(customDraw->hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                    FillRect(customDraw->hdc, &customDraw->rc, GetStockObject(DC_BRUSH));
                                     break;
                                 }
-                   
-                                //if (newFont)
-                                //SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
 
-                                //if (colorChanged)
-                                //{
-                                //    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
-                                //        customDraw->clrText = RGB(0x00, 0x00, 0x00);
-                                //    else
-                                //        customDraw->clrText = RGB(0xff, 0xff, 0xff);
-                                //}
-                                customDraw->clrText = RGB(0xff, 0xff, 0xff);
-                                customDraw->clrFace = RGB(0xff, 0, 0);
-
-                                return CDRF_NEWFONT;
+                                return CDRF_SKIPDEFAULT;
                             }
                             break;
                         }
@@ -985,78 +955,145 @@ LRESULT CALLBACK MainWndSubclassProc(
                 {
                 case NM_CUSTOMDRAW:
                     {
-                        LPNMLVCUSTOMDRAW customDraw = (LPNMLVCUSTOMDRAW)header;
+                        LPNMTBCUSTOMDRAW customDraw = (LPNMTBCUSTOMDRAW)header;
 
                         switch (customDraw->nmcd.dwDrawStage)
                         {
                         case CDDS_PREPAINT:
-                            {
-                                switch (PhGetIntegerSetting(L"GraphColorMode"))
-                                {
-                                case 0: // New colors
-                                    SetTextColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
-                                    break;
-                                case 1: // Old colors
-                                    SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
-                                    break;
-                                }
-                            }
-                            return CDRF_NOTIFYITEMDRAW;
+                            return CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
                         case CDDS_ITEMPREPAINT:
                             {
-                                BOOLEAN colorChanged = FALSE;
-                                HFONT newFont = NULL;
+                                SetBkMode(customDraw->nmcd.hdc, TRANSPARENT);
 
-                               /* if (context->ItemColorFunction)
-                                {
-                                    customDraw->clrTextBk = context->ItemColorFunction(
-                                        (INT)customDraw->nmcd.dwItemSpec,
-                                        (PVOID)customDraw->nmcd.lItemlParam,
-                                        context->Context
+                                ULONG currentIndex = (ULONG)SendMessage(
+                                    customDraw->nmcd.hdr.hwndFrom,
+                                    TB_COMMANDTOINDEX,
+                                    customDraw->nmcd.dwItemSpec,
+                                    0
                                     );
-                                    colorChanged = TRUE;
-                                }
+                                BOOLEAN isHighlighted = SendMessage(
+                                    customDraw->nmcd.hdr.hwndFrom, 
+                                    TB_GETHOTITEM, 
+                                    0, 
+                                    0
+                                    ) == currentIndex;
+                                BOOLEAN isMouseDown = SendMessage(
+                                    customDraw->nmcd.hdr.hwndFrom,
+                                    TB_ISBUTTONPRESSED,
+                                    customDraw->nmcd.dwItemSpec,
+                                    0
+                                    ) == 0;
 
-                                if (context->ItemFontFunction)
+      /*                          if (isMouseDown)
                                 {
-                                    newFont = context->ItemFontFunction(
-                                        (INT)customDraw->nmcd.dwItemSpec,
-                                        (PVOID)customDraw->nmcd.lItemlParam,
-                                        context->Context
-                                    );
+                                    SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
                                 }*/
-
-                                switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                if (isHighlighted)
                                 {
-                                case 0: // New colors
-                                    //SetTextColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
-                                    SetDCBrushColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
-                                    break;
-                                case 1: // Old colors
-                                    //SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
-                                    SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
-                                    FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                    switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                    {
+                                    case 0: // New colors
+                                        SetTextColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
+                                        SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                        FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                        break;
+                                    case 1: // Old colors
+                                        SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                        SetDCBrushColor(customDraw->nmcd.hdc, RGB(128, 128, 128));
+                                        FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                        break;
+                                    }
+                                } 
+                                else
+                                {
+                                    switch (PhGetIntegerSetting(L"GraphColorMode"))
+                                    {
+                                    case 0: // New colors
+                                        SetTextColor(customDraw->nmcd.hdc, RGB(0x0, 0x0, 0x0));
+                                        SetDCBrushColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                        FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                        break;
+                                    case 1: // Old colors
+                                        SetTextColor(customDraw->nmcd.hdc, RGB(0xff, 0xff, 0xff));
+                                        SetDCBrushColor(customDraw->nmcd.hdc, RGB(65, 65, 65)); //RGB(28, 28, 28)); // RGB(65, 65, 65));
+                                        FillRect(customDraw->nmcd.hdc, &customDraw->nmcd.rc, GetStockObject(DC_BRUSH));
+                                        break;
+                                    }
+                                }
+      
+
+                                static HFONT fontHandle = NULL;
+                                if (!fontHandle)
+                                {
+                                    NONCLIENTMETRICS metrics = { sizeof(metrics) };
+                                    if (SystemParametersInfo(SPI_GETNONCLIENTMETRICS, 0, &metrics, 0))
+                                    {
+                                        fontHandle = CreateFontIndirect(&metrics.lfMessageFont);
+                                    }
+                                }
+                                SelectObject(customDraw->nmcd.hdc, fontHandle);
+
+                                TBBUTTONINFO buttonInfo =
+                                {
+                                    sizeof(TBBUTTONINFO),
+                                    TBIF_STYLE | TBIF_COMMAND | TBIF_STATE | TBIF_IMAGE
+                                };        
+                                if (SendMessage(
+                                    customDraw->nmcd.hdr.hwndFrom,
+                                    TB_GETBUTTONINFO,
+                                    (ULONG)customDraw->nmcd.dwItemSpec,
+                                    (LPARAM)&buttonInfo
+                                    ) == -1)
+                                {
                                     break;
                                 }
-                  
-                                //if (newFont)
-                                SelectObject(customDraw->nmcd.hdc, PhApplicationFont);
+             
+                                if (buttonInfo.iImage != -1)
+                                {
+                                    HIMAGELIST toolbarImageList;
 
-                                //if (colorChanged)
-                                //{
-                                //    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
-                                        customDraw->clrText = RGB(0x00, 0x00, 0x00);
-                                //    else
-                                        customDraw->clrText = RGB(0xff, 0xff, 0xff);
-                                //}
-                                customDraw->clrFace = RGB(0xff, 0, 0);
+                                    if (toolbarImageList = (HIMAGELIST)SendMessage(customDraw->nmcd.hdr.hwndFrom, TB_GETIMAGELIST, 0, 0))
+                                    {
+                                        customDraw->nmcd.rc.left += 5;
 
-                                return CDRF_NEWFONT;
+                                        ImageList_Draw(
+                                            toolbarImageList,
+                                            buttonInfo.iImage,
+                                            customDraw->nmcd.hdc,
+                                            customDraw->nmcd.rc.left,
+                                            customDraw->nmcd.rc.top + 3,
+                                            ILD_NORMAL
+                                            );
+                                    }
+                                }
+
+                                customDraw->nmcd.rc.left += 10;
+
+                                if (buttonInfo.fsStyle & BTNS_SHOWTEXT)
+                                {
+                                    WCHAR buttonText[0x100] = L"";
+                                    SendMessage(
+                                        customDraw->nmcd.hdr.hwndFrom,
+                                        TB_GETBUTTONTEXT,
+                                        (ULONG)customDraw->nmcd.dwItemSpec,
+                                        (LPARAM)buttonText
+                                        );
+
+                            
+                                    DrawText(
+                                        customDraw->nmcd.hdc,
+                                        buttonText,
+                                        -1,
+                                        &customDraw->nmcd.rc,
+                                        DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_HIDEPREFIX //| DT_WORD_ELLIPSIS
+                                        );
+                                }
+     
+                                //customDraw->clrText = RGB(0x0, 0xff, 0);
+                                // return TBCDRF_USECDCOLORS | CDRF_NEWFONT;
+                                return CDRF_SKIPDEFAULT;
                             }
                             break;
                         }

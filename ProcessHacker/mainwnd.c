@@ -321,12 +321,6 @@ LRESULT CALLBACK PhMwpWndProc(
                 return result;
         }
         break;
-    case WM_MEASUREITEM:
-        PhThemeWindowMeasureItem((LPMEASUREITEMSTRUCT)lParam);
-        return TRUE;
-    case WM_DRAWITEM:
-        PhThemeWindowDrawItem((LPDRAWITEMSTRUCT)lParam);
-        return TRUE;
     }
 
     if (uMsg >= WM_PH_FIRST && uMsg <= WM_PH_LAST)
@@ -357,6 +351,8 @@ RTL_ATOM PhMwpInitializeWindowClass(
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hIcon = PH_LOAD_SHARED_ICON_LARGE(PhLibImageBase, MAKEINTRESOURCE(IDI_PROCESSHACKER));
     wcex.hIconSm = PH_LOAD_SHARED_ICON_SMALL(PhLibImageBase, MAKEINTRESOURCE(IDI_PROCESSHACKER));
+
+    wcex.hbrBackground = GetStockObject(BLACK_BRUSH);
 
     return RegisterClassEx(&wcex);
 }
@@ -1674,7 +1670,8 @@ VOID PhMwpOnInitMenuPopup(
     switch (PhGetIntegerSetting(L"GraphColorMode"))
     {
     case 0: // New colors
-        //menuInfo.hbrBack = CreateSolidBrush(RGB(0x0, 0x0, 0x0));
+        menuInfo.fMask |= MIM_BACKGROUND;
+        menuInfo.hbrBack = CreateSolidBrush(RGB(0x0, 0x0, 0x0));  // LEAK
         break;
     case 1: // Old colors
         menuInfo.fMask |= MIM_BACKGROUND;
@@ -1691,11 +1688,11 @@ VOID PhMwpOnInitMenuPopup(
 
     if (PhPluginsEnabled)
     {
-        PH_PLUGIN_MENU_INFORMATION menuInfo;
+        PH_PLUGIN_MENU_INFORMATION pluginMenuInfo;
 
-        PhPluginInitializeMenuInfo(&menuInfo, menu, PhMainWndHandle, PH_PLUGIN_MENU_DISALLOW_HOOKS);
-        menuInfo.u.MainMenu.SubMenuIndex = Index;
-        PhInvokeCallback(PhGetGeneralCallback(GeneralCallbackMainMenuInitializing), &menuInfo);
+        PhPluginInitializeMenuInfo(&pluginMenuInfo, menu, PhMainWndHandle, PH_PLUGIN_MENU_DISALLOW_HOOKS);
+        pluginMenuInfo.u.MainMenu.SubMenuIndex = Index;
+        PhInvokeCallback(PhGetGeneralCallback(GeneralCallbackMainMenuInitializing), &pluginMenuInfo);
     }
 
     PhEMenuToHMenu2(Menu, menu, 0, NULL);
