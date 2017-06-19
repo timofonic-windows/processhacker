@@ -43,7 +43,7 @@ PHLIBAPI
 LRESULT
 NTAPI
 PhThemeDrawButton(
-    _In_ LPNMTVCUSTOMDRAW drawInfo
+    _In_ LPNMCUSTOMDRAW drawInfo
     );
 
 PHLIBAPI
@@ -58,6 +58,20 @@ BOOLEAN
 NTAPI
 PhThemeWindowMeasureItem(
     _In_ PMEASUREITEMSTRUCT DrawInfo
+    );
+
+PHLIBAPI
+LRESULT
+NTAPI
+PhThemeWindowDrawRebar(
+    _In_ LPNMCUSTOMDRAW DrawInfo
+    );
+
+PHLIBAPI
+LRESULT
+NTAPI
+PhThemeWindowDrawToolbar(
+    _In_ LPNMTBCUSTOMDRAW DrawInfo
     );
 // end_phapppub
 

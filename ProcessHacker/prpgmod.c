@@ -544,9 +544,10 @@ INT_PTR CALLBACK PhpProcessModulesDlgProc(
                 PPH_LAYOUT_ITEM dialogItem;
 
                 dialogItem = PhAddPropPageLayoutItem(hwndDlg, hwndDlg, PH_PROP_PAGE_TAB_CONTROL_PARENT, PH_ANCHOR_ALL);
-                PhAddPropPageLayoutItem(hwndDlg, GetDlgItem(hwndDlg, IDC_SEARCH), dialogItem, PH_ANCHOR_TOP | PH_ANCHOR_RIGHT);
                 PhAddPropPageLayoutItem(hwndDlg, modulesContext->ListContext.TreeNewHandle, dialogItem, PH_ANCHOR_ALL);
-
+                PhAddPropPageLayoutItem(hwndDlg, modulesContext->SearchboxHandle, dialogItem, PH_ANCHOR_BOTTOM | PH_ANCHOR_LEFT);
+                PhAddPropPageLayoutItem(hwndDlg, GetDlgItem(hwndDlg, IDC_FILTEROPTIONS), dialogItem, PH_ANCHOR_BOTTOM | PH_ANCHOR_LEFT);
+                
                 PhDoPropPageLayout(hwndDlg);
 
                 propPageContext->LayoutInitialized = TRUE;

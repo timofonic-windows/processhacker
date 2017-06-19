@@ -601,6 +601,8 @@ EXPORTS
 	PhThemeDrawButton
 	PhThemeWindowDrawItem
 	PhThemeWindowMeasureItem
+	PhThemeWindowDrawRebar
+	PhThemeWindowDrawToolbar
 
 ; verify
 	PhVerifyFile

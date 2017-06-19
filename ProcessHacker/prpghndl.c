@@ -472,8 +472,9 @@ INT_PTR CALLBACK PhpProcessHandlesDlgProc(
                 PPH_LAYOUT_ITEM dialogItem;
                 
                 dialogItem = PhAddPropPageLayoutItem(hwndDlg, hwndDlg, PH_PROP_PAGE_TAB_CONTROL_PARENT, PH_ANCHOR_ALL);
-                PhAddPropPageLayoutItem(hwndDlg, handlesContext->SearchboxHandle, dialogItem, PH_ANCHOR_TOP | PH_ANCHOR_RIGHT);
-                PhAddPropPageLayoutItem(hwndDlg, GetDlgItem(hwndDlg, IDC_LIST), dialogItem, PH_ANCHOR_ALL);
+                PhAddPropPageLayoutItem(hwndDlg, tnHandle, dialogItem, PH_ANCHOR_ALL);
+                PhAddPropPageLayoutItem(hwndDlg, handlesContext->SearchboxHandle, dialogItem, PH_ANCHOR_BOTTOM | PH_ANCHOR_LEFT);
+                PhAddPropPageLayoutItem(hwndDlg, GetDlgItem(hwndDlg, IDC_HIDEUNNAMEDHANDLES), dialogItem, PH_ANCHOR_BOTTOM | PH_ANCHOR_LEFT);
 
                 PhDoPropPageLayout(hwndDlg);
 

@@ -23,6 +23,7 @@
 #include "nettools.h"
 #include <commonutil.h>
 #include <richedit.h>
+#include <phtheme.h>
 
 VOID RichEditSetText(
     _In_ HWND RichEditHandle,
@@ -424,7 +425,7 @@ INT_PTR CALLBACK NetworkOutputDlgProc(
             if (dialogThread = PhCreateThread(0, NetworkWhoisThreadStart, (PVOID)context))
                 NtClose(dialogThread);
 
-            EnableThemeDialogTexture(hwndDlg, ETDT_ENABLETAB);
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_COMMAND:

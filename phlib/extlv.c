@@ -130,7 +130,7 @@ VOID PhSetExtendedListView(
     context->EnableRedraw = 1;
     context->Cursor = NULL;
 
-    //ListView_SetBkColor(hWnd, RGB(30, 30, 30));
+    ListView_SetBkColor(hWnd, RGB(30, 30, 30));
     ListView_SetTextBkColor(hWnd, RGB(30, 30, 30));
     ListView_SetTextColor(hWnd, RGB(0xff, 0xff, 0xff));
     PhThemeInitializeHeaderControl((HWND)SendMessage(hWnd, LVM_GETHEADER, 0, 0));
@@ -232,6 +232,7 @@ LRESULT CALLBACK PhpExtendedListViewWndProc(
 
                                 if (context->ItemColorFunction)
                                 {
+                                    // TODO: Alphablend color.
                                     customDraw->clrTextBk = context->ItemColorFunction(
                                         (INT)customDraw->nmcd.dwItemSpec,
                                         (PVOID)customDraw->nmcd.lItemlParam,
@@ -252,13 +253,20 @@ LRESULT CALLBACK PhpExtendedListViewWndProc(
                                 if (newFont)
                                     SelectObject(customDraw->nmcd.hdc, newFont);
 
-                                if (colorChanged)
-                                {
-                                    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
-                                        customDraw->clrText = RGB(0x00, 0x00, 0x00);
-                                    else
-                                        customDraw->clrText = RGB(0xff, 0xff, 0xff);
-                                }
+                                //if (colorChanged)
+                                //{
+                                //    if (PhGetColorBrightness(customDraw->clrTextBk) > 100) // slightly less than half
+                                //        customDraw->clrText = RGB(0x00, 0x00, 0x00);
+                                //    else
+                                //        customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                //}
+
+                                customDraw->clrText = RGB(0xff, 0xff, 0xff);
+                                customDraw->clrTextBk = RGB(30, 30, 30);
+
+                                //ListView_SetBkColor(hWnd, RGB(30, 30, 30));
+                                //ListView_SetTextBkColor(hWnd, RGB(30, 30, 30));
+                                //ListView_SetTextColor(hWnd, RGB(0xff, 0xff, 0xff));
 
                                 if (!newFont)
                                     return CDRF_DODEFAULT;

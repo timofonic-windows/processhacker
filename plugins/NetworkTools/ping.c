@@ -22,6 +22,7 @@
 
 #include "nettools.h"
 #include <commonutil.h>
+#include <phtheme.h>
 
 #define WM_PING_UPDATE (WM_APP + 151)
 
@@ -348,7 +349,7 @@ INT_PTR CALLBACK NetworkPingWndProc(
                 &context->ProcessesUpdatedRegistration
                 );
 
-            EnableThemeDialogTexture(hwndDlg, ETDT_ENABLETAB);
+            PhThemeInitializeWindow(hwndDlg);
         }
         return TRUE;
     case WM_COMMAND:

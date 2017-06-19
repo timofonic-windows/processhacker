@@ -253,7 +253,6 @@ INT_PTR CALLBACK PhSipSysInfoDialogProc(
         break;
     case WM_NOTIFY:
         {
-            LPNMHDR data = (LPNMHDR)lParam;
             LRESULT result;
 
             if (PhSipOnNotify((NMHDR *)lParam, &result))
@@ -261,19 +260,9 @@ INT_PTR CALLBACK PhSipSysInfoDialogProc(
                 SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, result);
                 return TRUE;
             }
-
-            switch (data->code)
-            {
-            case NM_CUSTOMDRAW:
-                {
-                    SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, PhThemeDrawButton((LPNMTVCUSTOMDRAW)lParam));
-                    return TRUE;
-                }
-                break;
-            }
         }
         break;
-    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORBTN: // TODO: theme sysinfo window.
     case WM_CTLCOLORDLG:
     case WM_CTLCOLORSTATIC:
         {
@@ -287,7 +276,7 @@ INT_PTR CALLBACK PhSipSysInfoDialogProc(
                 break;
             case 1: // Old colors
                 SetTextColor((HDC)wParam, RGB(0xff, 0xff, 0xff));
-                SetDCBrushColor((HDC)wParam, RGB(0x0, 0x0, 0x0));
+                SetDCBrushColor((HDC)wParam, RGB(30, 30, 30));
                 break;
             }
 
@@ -1281,7 +1270,8 @@ VOID PhSipDrawRestoreSummaryPanel(
         FillRect(hdc, Rect, GetSysColorBrush(COLOR_3DFACE));
         break;
     case 1: // Old colors
-        FillRect(hdc, Rect, GetSysColorBrush(COLOR_WINDOWTEXT));
+        SetDCBrushColor(hdc, RGB(30, 30, 30));
+        FillRect(hdc, Rect, GetStockObject(DC_BRUSH));
         break;
     }
 
@@ -1341,7 +1331,6 @@ VOID PhSipDrawPanel(
     )
 {
     PH_SYSINFO_DRAW_PANEL sysInfoDrawPanel;
-
     if (CurrentView == SysInfoSectionView)
     {
         switch (PhCsGraphColorMode)
@@ -1350,7 +1339,8 @@ VOID PhSipDrawPanel(
             FillRect(hdc, Rect, GetSysColorBrush(COLOR_3DFACE));
             break;
         case 1: // Old colors
-            FillRect(hdc, Rect, GetSysColorBrush(COLOR_WINDOWTEXT));
+            SetDCBrushColor(hdc, RGB(30, 30, 30));
+            FillRect(hdc, Rect, GetStockObject(DC_BRUSH));
             break;
         }
     }

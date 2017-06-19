@@ -24,6 +24,7 @@
 #include "tracert.h"
 #include <commonutil.h>
 #include <math.h>
+#include <phtheme.h>
 
 PPH_STRING TracertGetErrorMessage(
     _In_ IP_STATUS Result
@@ -602,7 +603,7 @@ INT_PTR CALLBACK TracertDlgProc(
             if (tracertThread = PhCreateThread(0, NetworkTracertThreadStart, (PVOID)context))
                 NtClose(tracertThread);
 
-            EnableThemeDialogTexture(hwndDlg, ETDT_ENABLETAB);
+            PhThemeInitializeWindow(hwndDlg);
         }
         break;
     case WM_COMMAND:
