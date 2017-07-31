@@ -105,6 +105,7 @@ typedef struct _PH_TREENEW_NODE
 // Extended flags
 #define TN_FLAG_ITEM_DRAG_SELECT 0x1
 #define TN_FLAG_NO_UNFOLDING_TOOLTIPS 0x2
+#define TN_FLAG_NO_NATIVE_THEME_SELECTION 0x3
 
 // Callback flags
 #define TN_CACHE 0x1

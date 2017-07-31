@@ -2081,7 +2081,11 @@ VOID PhTnpUpdateThemeData(
 
     if (Context->ThemeData)
     {
-        Context->ThemeHasItemBackground = !!IsThemePartDefined(Context->ThemeData, TVP_TREEITEM, 0);
+        if (!(Context->ExtendedFlags & TN_FLAG_NO_NATIVE_THEME_SELECTION))
+            Context->ThemeHasItemBackground = !!IsThemePartDefined(Context->ThemeData, TVP_TREEITEM, 0);
+        else
+            Context->ThemeHasItemBackground = FALSE;
+
         Context->ThemeHasGlyph = !!IsThemePartDefined(Context->ThemeData, TVP_GLYPH, 0);
         Context->ThemeHasHotGlyph = !!IsThemePartDefined(Context->ThemeData, TVP_HOTGLYPH, 0);
     }
