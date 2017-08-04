@@ -209,6 +209,12 @@ VOID NTAPI MenuItemCallback(
     case MENUITEM_JOTTI_UPLOAD:
         UploadToOnlineService(menuItem->Context, MENUITEM_JOTTI_UPLOAD);
         break;
+    case MENUITEM_VIRUSTOTAL_UPLOAD_SERVICE:
+        UploadServiceToOnlineService(menuItem->Context, MENUITEM_VIRUSTOTAL_UPLOAD_SERVICE);
+        break;
+    case MENUITEM_JOTTI_UPLOAD_SERVICE:
+        UploadServiceToOnlineService(menuItem->Context, MENUITEM_JOTTI_UPLOAD_SERVICE);
+        break;
     case MENUITEM_VIRUSTOTAL_UPLOAD_FILE:
         {
             static PH_FILETYPE_FILTER filters[] =
@@ -258,6 +264,7 @@ VOID NTAPI MainMenuInitializingCallback(
 }
 
 PPH_EMENU_ITEM CreateSendToMenu(
+    _In_ BOOLEAN ProcessesMenu,
     _In_ PPH_EMENU_ITEM Parent,
     _In_ PPH_STRING FileName
     )
@@ -270,7 +277,7 @@ PPH_EMENU_ITEM CreateSendToMenu(
     PhInsertEMenuItem(sendToMenu, PhPluginCreateEMenuItem(PluginInstance, 0, MENUITEM_VIRUSTOTAL_UPLOAD, L"virustotal.com", FileName), -1);
     PhInsertEMenuItem(sendToMenu, PhPluginCreateEMenuItem(PluginInstance, 0, MENUITEM_JOTTI_UPLOAD, L"virusscan.jotti.org", FileName), -1);
 
-    if (menuItem = PhFindEMenuItem(Parent, PH_EMENU_FIND_STARTSWITH, L"Search online", 0))
+    if (ProcessesMenu && (menuItem = PhFindEMenuItem(Parent, PH_EMENU_FIND_STARTSWITH, L"Search online", 0)))
     {
         insertIndex = PhIndexOfEMenuItem(Parent, menuItem);
         PhInsertEMenuItem(Parent, sendToMenu, insertIndex + 1);
@@ -299,7 +306,7 @@ VOID NTAPI ProcessMenuInitializingCallback(
     else
         processItem = NULL;
 
-    sendToMenu = CreateSendToMenu(menuInfo->Menu, processItem ? processItem->FileName : NULL);
+    sendToMenu = CreateSendToMenu(TRUE, menuInfo->Menu, processItem ? processItem->FileName : NULL);
 
     // Only enable the Send To menu if there is exactly one process selected and it has a file name.
     if (!processItem || !processItem->FileName)
@@ -322,7 +329,7 @@ VOID NTAPI ModuleMenuInitializingCallback(
     else
         moduleItem = NULL;
 
-    sendToMenu = CreateSendToMenu(menuInfo->Menu, moduleItem ? moduleItem->FileName : NULL);
+    sendToMenu = CreateSendToMenu(FALSE, menuInfo->Menu, moduleItem ? moduleItem->FileName : NULL);
 
     if (!moduleItem)
     {
@@ -338,35 +345,19 @@ VOID NTAPI ServiceMenuInitializingCallback(
     PPH_PLUGIN_MENU_INFORMATION menuInfo = Parameter;
     PPH_SERVICE_ITEM serviceItem;
     PPH_EMENU_ITEM sendToMenu;
-    PPH_STRING serviceFileName = NULL;
-    PPH_STRING serviceBinaryPath = NULL;
 
     if (menuInfo->u.Service.NumberOfServices == 1)
         serviceItem = menuInfo->u.Service.Services[0];
     else
         serviceItem = NULL;
 
-    if (serviceItem)
-    {
-        QueryServiceFileName(
-            &serviceItem->Name->sr,
-            &serviceFileName,
-            &serviceBinaryPath
-            );
-    }
+    sendToMenu = PhPluginCreateEMenuItem(PluginInstance, 0, 0, L"Send to", NULL);
+    PhInsertEMenuItem(sendToMenu, PhPluginCreateEMenuItem(PluginInstance, 0, MENUITEM_VIRUSTOTAL_UPLOAD_SERVICE, L"virustotal.com", serviceItem ? serviceItem : NULL), -1);
+    PhInsertEMenuItem(sendToMenu, PhPluginCreateEMenuItem(PluginInstance, 0, MENUITEM_JOTTI_UPLOAD_SERVICE, L"virusscan.jotti.org", serviceItem ? serviceItem : NULL), -1);
+    PhInsertEMenuItem(menuInfo->Menu, PhPluginCreateEMenuItem(PluginInstance, PH_EMENU_SEPARATOR, 0, NULL, NULL), -1);
+    PhInsertEMenuItem(menuInfo->Menu, sendToMenu, -1);
 
-    if (serviceBinaryPath) 
-        PhDereferenceObject(serviceBinaryPath);
-
-    if (serviceFileName)
-    {
-        // TODO: memory leak or possible use-after-free bug?
-        PhAutoDereferenceObject(serviceFileName);
-    }
-
-    sendToMenu = CreateSendToMenu(menuInfo->Menu, serviceFileName ? serviceFileName : NULL);
-
-    if (!serviceItem || !serviceFileName)
+    if (!serviceItem)
     {
         sendToMenu->Flags |= PH_EMENU_DISABLED;
     }

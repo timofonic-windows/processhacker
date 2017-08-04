@@ -1561,6 +1561,159 @@ NtCreateThreadEx(
 
 #if (PHNT_MODE != PHNT_MODE_KERNEL)
 
+// JOBOBJECTINFOCLASS
+#define JobObjectBasicAccountingInformation 1
+#define JobObjectBasicLimitInformation 2
+#define JobObjectBasicProcessIdList 3
+#define JobObjectBasicUIRestrictions 4
+#define JobObjectSecurityLimitInformation 5
+#define JobObjectEndOfJobTimeInformation 6
+#define JobObjectAssociateCompletionPortInformation 7
+#define JobObjectBasicAndIoAccountingInformation 8
+#define JobObjectExtendedLimitInformation 9
+#define JobObjectJobSetInformation 10
+#define JobObjectGroupInformation 11
+#define JobObjectNotificationLimitInformation 12
+#define JobObjectLimitViolationInformation 13
+#define JobObjectGroupInformationEx 14
+#define JobObjectCpuRateControlInformation 15
+#define JobObjectCompletionFilter 16
+#define JobObjectCompletionCounter 17
+#define JobObjectFreezeInformation 18
+#define JobObjectExtendedAccountingInformation 19
+#define JobObjectWakeInformation 20
+#define JobObjectBackgroundInformation 21
+#define JobObjectSchedulingRankBiasInformation 22
+#define JobObjectTimerVirtualizationInformation 23
+#define JobObjectCycleTimeNotification 24
+#define JobObjectClearEvent 25
+#define JobObjectInterferenceInformation 26
+#define JobObjectClearPeakJobMemoryUsed 27
+#define JobObjectMemoryUsageInformation 28
+#define JobObjectSharedCommit 29
+#define JobObjectContainerId 30
+#define JobObjectIoRateControlInformation 31
+#define JobObjectNetRateControlInformation 32
+#define JobObjectNotificationLimitInformation2 33
+#define JobObjectLimitViolationInformation2 34
+#define JobObjectCreateSilo 35
+#define JobObjectSiloBasicInformation 36
+#define JobObjectSiloRootDirectory 37
+#define JobObjectServerSiloBasicInformation 38
+#define JobObjectServerSiloUserSharedData 39
+#define JobObjectServerSiloInitialize 40
+#define JobObjectServerSiloRunningState 41
+#define JobObjectIoAttribution 42
+#define JobObjectMemoryPartitionInformation 43
+#define JobObjectContainerTelemetryId 44
+#define JobObjectSiloSystemRoot 45
+#define JobObjectEnergyTrackingState 46
+#define JobObjectThreadImpersonationInformation 47
+#define MaxJobObjectInfoClass 48
+
+// private
+typedef struct _JOBOBJECT_EXTENDED_ACCOUNTING_INFORMATION
+{
+    JOBOBJECT_BASIC_ACCOUNTING_INFORMATION BasicInfo;
+    IO_COUNTERS IoInfo;
+    PROCESS_DISK_COUNTERS DiskIoInfo;
+    ULONG64 ContextSwitches;
+    LARGE_INTEGER TotalCycleTime;
+    ULONG64 ReadyTime;
+    PROCESS_ENERGY_VALUES EnergyValues;
+} JOBOBJECT_EXTENDED_ACCOUNTING_INFORMATION, *PJOBOBJECT_EXTENDED_ACCOUNTING_INFORMATION;
+
+// private
+typedef struct _JOBOBJECT_WAKE_INFORMATION
+{
+    HANDLE NotificationChannel;
+    ULONG64 WakeCounters[7];
+} JOBOBJECT_WAKE_INFORMATION, *PJOBOBJECT_WAKE_INFORMATION;
+
+// private
+typedef struct _JOBOBJECT_WAKE_INFORMATION_V1
+{
+    HANDLE NotificationChannel;
+    ULONG64 WakeCounters[4];
+} JOBOBJECT_WAKE_INFORMATION_V1, *PJOBOBJECT_WAKE_INFORMATION_V1;
+
+// private
+typedef struct _JOBOBJECT_INTERFERENCE_INFORMATION
+{
+    ULONG64 Count;
+} JOBOBJECT_INTERFERENCE_INFORMATION, *PJOBOBJECT_INTERFERENCE_INFORMATION;
+
+// private
+typedef struct _JOBOBJECT_WAKE_FILTER
+{
+    ULONG HighEdgeFilter;
+    ULONG LowEdgeFilter;
+} JOBOBJECT_WAKE_FILTER, *PJOBOBJECT_WAKE_FILTER;
+
+// private
+typedef struct _JOBOBJECT_FREEZE_INFORMATION
+{
+    union
+    {
+        ULONG Flags;
+        struct
+        {
+            ULONG FreezeOperation : 1;
+            ULONG FilterOperation : 1;
+            ULONG SwapOperation : 1;
+            ULONG Reserved : 29;
+        };
+    };
+    BOOLEAN Freeze;
+    BOOLEAN Swap;
+    UCHAR Reserved0[2];
+    JOBOBJECT_WAKE_FILTER WakeFilter;
+} JOBOBJECT_FREEZE_INFORMATION, *PJOBOBJECT_FREEZE_INFORMATION;
+
+// private
+typedef struct _JOBOBJECT_MEMORY_USAGE_INFORMATION
+{
+    ULONG64 JobMemory;
+    ULONG64 PeakJobMemoryUsed;
+} JOBOBJECT_MEMORY_USAGE_INFORMATION, *PJOBOBJECT_MEMORY_USAGE_INFORMATION;
+
+// private
+typedef struct _JOBOBJECT_MEMORY_USAGE_INFORMATION_V2
+{
+    JOBOBJECT_MEMORY_USAGE_INFORMATION BasicInfo;
+    ULONG64 JobSharedMemory;
+    ULONG64 Reserved[2];
+} JOBOBJECT_MEMORY_USAGE_INFORMATION_V2, *PJOBOBJECT_MEMORY_USAGE_INFORMATION_V2;
+
+// private
+typedef struct _SILO_USER_SHARED_DATA
+{
+    ULONG64 ServiceSessionId;
+    ULONG ActiveConsoleId;
+    LONGLONG ConsoleSessionForegroundProcessId;
+    NT_PRODUCT_TYPE NtProductType;
+    ULONG SuiteMask;
+    ULONG SharedUserSessionId;
+    BOOLEAN IsMultiSessionSku;
+    WCHAR NtSystemRoot[260];
+    USHORT UserModeGlobalLogger[16];
+} SILO_USER_SHARED_DATA, *PSILO_USER_SHARED_DATA;
+
+// private
+typedef struct _SILOOBJECT_ROOT_DIRECTORY
+{
+    ULONG ControlFlags;
+    UNICODE_STRING Path;
+} SILOOBJECT_ROOT_DIRECTORY, *PSILOOBJECT_ROOT_DIRECTORY;
+
+// private
+typedef struct _JOBOBJECT_ENERGY_TRACKING_STATE
+{
+    ULONG64 Value;
+    ULONG UpdateMask;
+    ULONG DesiredState;
+} JOBOBJECT_ENERGY_TRACKING_STATE, *PJOBOBJECT_ENERGY_TRACKING_STATE;
+
 NTSYSCALLAPI
 NTSTATUS
 NTAPI

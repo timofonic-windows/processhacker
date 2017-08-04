@@ -141,7 +141,23 @@ VOID TracertQueueHostLookup(
 
         if (NT_SUCCESS(RtlIpv4AddressToStringEx(&sockAddrIn, 0, addressString, &addressStringLength)))
         {
-            PhMoveReference(&Node->IpAddressString, PhCreateString(addressString));
+            if (!PhIsNullOrEmptyString(Node->IpAddressString))
+            {
+                // Make sure we don't append the same address.
+                if (PhFindStringInString(Node->IpAddressString, 0, addressString) == -1)
+                {
+                    // Some routes can return multiple addresses for the same ping or 'hop', 
+                    // so make sure we don't lose this information (as every other tracert tool does) 
+                    // and instead append the additional IP address to the node.
+                    PhMoveReference(&Node->IpAddressString, 
+                        PhFormatString(L"%s, %s", PhGetString(Node->IpAddressString), addressString)
+                        );
+                }
+            }
+            else
+            {
+                PhMoveReference(&Node->IpAddressString, PhCreateString(addressString));
+            }
         }
 
         resolve = PhCreateAlloc(sizeof(TRACERT_RESOLVE_WORKITEM));
@@ -176,7 +192,23 @@ VOID TracertQueueHostLookup(
 
         if (NT_SUCCESS(RtlIpv6AddressToStringEx(&sockAddrIn6, 0, 0, addressString, &addressStringLength)))
         {
-            PhMoveReference(&Node->IpAddressString, PhCreateString(addressString));
+            if (!PhIsNullOrEmptyString(Node->IpAddressString))
+            {
+                // Make sure we don't append the same address.
+                if (PhFindStringInString(Node->IpAddressString, 0, addressString) == -1)
+                {
+                    // Some routes can return multiple addresses for the same ping or 'hop', 
+                    // so make sure we don't lose this information (as every other tracert tool does)
+                    // and instead append the additional IP address to the node.
+                    PhMoveReference(&Node->IpAddressString, 
+                        PhFormatString(L"%s, %s", PhGetString(Node->IpAddressString), addressString)
+                        );
+                }
+            }
+            else
+            {
+                PhMoveReference(&Node->IpAddressString, PhCreateString(addressString));
+            }
         }
 
         resolve = PhCreateAlloc(sizeof(TRACERT_RESOLVE_WORKITEM));
@@ -406,9 +438,9 @@ CleanupExit:
         IcmpCloseHandle(icmpHandle);
     }
 
-    PhDereferenceObject(context);
-
     PostMessage(context->WindowHandle, NTM_RECEIVEDFINISH, 0, 0);
+
+    PhDereferenceObject(context);
     return STATUS_SUCCESS;
 }
 
@@ -598,14 +630,16 @@ INT_PTR CALLBACK TracertDlgProc(
             PhAddLayoutItem(&context->LayoutManager, GetDlgItem(hwndDlg, IDC_STATUS), NULL, PH_ANCHOR_TOP | PH_ANCHOR_LEFT | PH_ANCHOR_RIGHT | PH_LAYOUT_FORCE_INVALIDATE);
             PhAddLayoutItem(&context->LayoutManager, context->TreeNewHandle, NULL, PH_ANCHOR_ALL);
             PhAddLayoutItem(&context->LayoutManager, GetDlgItem(hwndDlg, IDCANCEL), NULL, PH_ANCHOR_BOTTOM | PH_ANCHOR_RIGHT);
+            PhAddLayoutItem(&context->LayoutManager, GetDlgItem(hwndDlg, IDC_REFRESH), NULL, PH_ANCHOR_BOTTOM | PH_ANCHOR_RIGHT);
 
             if (PhGetIntegerPairSetting(SETTING_NAME_TRACERT_WINDOW_POSITION).X != 0)
                 PhLoadWindowPlacementFromSetting(SETTING_NAME_TRACERT_WINDOW_POSITION, SETTING_NAME_TRACERT_WINDOW_SIZE, hwndDlg);
             else
                 PhCenterWindow(hwndDlg, PhMainWndHandle);
 
-            PhReferenceObject(context);
+            EnableWindow(GetDlgItem(hwndDlg, IDC_REFRESH), FALSE);
 
+            PhReferenceObject(context);
             PhCreateThread2(NetworkTracertThreadStart, (PVOID)context);
 
             EnableThemeDialogTexture(hwndDlg, ETDT_ENABLETAB);
@@ -617,6 +651,26 @@ INT_PTR CALLBACK TracertDlgProc(
             {
             case IDCANCEL:
                 DestroyWindow(hwndDlg);
+                break;
+            case IDC_REFRESH:
+                {
+                    Static_SetText(context->WindowHandle, PhaFormatString(
+                        L"Tracing %s...",
+                        context->IpAddressString
+                        )->Buffer);
+                    Static_SetText(GetDlgItem(hwndDlg, IDC_STATUS), PhaFormatString(
+                        L"Tracing route to %s with %lu bytes of data....",
+                        context->IpAddressString,
+                        PhGetIntegerSetting(SETTING_NAME_PING_SIZE)
+                        )->Buffer);
+
+                    EnableWindow(GetDlgItem(hwndDlg, IDC_REFRESH), FALSE);
+
+                    ClearTracertTree(context);
+
+                    PhReferenceObject(context);
+                    PhCreateThread2(NetworkTracertThreadStart, (PVOID)context);
+                }
                 break;
             case TRACERT_SHOWCONTEXTMENU:
                 {
@@ -668,24 +722,18 @@ INT_PTR CALLBACK TracertDlgProc(
         break;
     case NTM_RECEIVEDFINISH:
         {
-            PPH_STRING windowText;
+            EnableWindow(GetDlgItem(hwndDlg, IDC_REFRESH), TRUE);
 
-            if (windowText = PH_AUTO(PhGetWindowText(context->WindowHandle)))
-            {
-                Static_SetText(
-                    context->WindowHandle,
-                    PhaFormatString(L"%s complete", windowText->Buffer)->Buffer
-                    );
-            }
+            Static_SetText(context->WindowHandle, PhaFormatString(
+                L"Tracing %s... complete", 
+                context->IpAddressString
+                )->Buffer);
+            Static_SetText(GetDlgItem(hwndDlg, IDC_STATUS), PhaFormatString(
+                L"Tracing route to %s with %lu bytes of data... complete.", 
+                context->IpAddressString, 
+                PhGetIntegerSetting(SETTING_NAME_PING_SIZE)
+                )->Buffer);
 
-            if (windowText = PH_AUTO(PhGetWindowText(GetDlgItem(hwndDlg, IDC_STATUS))))
-            {
-                Static_SetText(
-                    GetDlgItem(hwndDlg, IDC_STATUS),
-                    PhaFormatString(L"%s complete", windowText->Buffer)->Buffer
-                    );
-            }
-            
             TreeNew_NodesStructured(context->TreeNewHandle);
         }
         break;
@@ -695,13 +743,33 @@ INT_PTR CALLBACK TracertDlgProc(
             PPH_STRING hostName = (PPH_STRING)lParam;
             PTRACERT_ROOT_NODE traceNode;
 
-            traceNode = FindTracertNode(context, index);
-
-            if (traceNode)
+            if (traceNode = FindTracertNode(context, index))
             {
-                PhMoveReference(&traceNode->HostnameString, hostName);
+                if (!PhIsNullOrEmptyString(traceNode->HostnameString))
+                {
+                    // Make sure we don't append the same hostname.
+                    if (PhFindStringInString(traceNode->HostnameString, 0, PhGetString(hostName)) == -1)
+                    {
+                        // Some routes can return multiple addresses for the same ping or 'hop', 
+                        // so make sure we don't lose this information (as every other tracert tool does) 
+                        // and instead append the additional hostname to the node.
+                        PhMoveReference(&traceNode->HostnameString,
+                            PhFormatString(L"%s, %s", PhGetString(traceNode->HostnameString), PhGetString(hostName))
+                            );
 
-                UpdateTracertNode(context, traceNode);
+                        UpdateTracertNode(context, traceNode);
+                    }
+                    else
+                    {
+                        PhDereferenceObject(hostName);
+                    }
+                }
+                else
+                {
+                    PhMoveReference(&traceNode->HostnameString, hostName);
+
+                    UpdateTracertNode(context, traceNode);
+                }
             }
             else
             {

@@ -208,6 +208,7 @@ VOID PhInitializeProcessTreeList(
     PhAddTreeNewColumnEx(hwnd, PHPRTLC_TIMESTAMP, FALSE, L"Time stamp", 140, PH_ALIGN_LEFT, -1, 0, TRUE);
     PhAddTreeNewColumnEx(hwnd, PHPRTLC_FILEMODIFIEDTIME, FALSE, L"File modified time", 140, PH_ALIGN_LEFT, -1, 0, TRUE);
     PhAddTreeNewColumnEx(hwnd, PHPRTLC_FILESIZE, FALSE, L"File size", 70, PH_ALIGN_RIGHT, -1, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(hwnd, PHPRTLC_SUBPROCESSCOUNT, FALSE, L"Subprocesses", 70, PH_ALIGN_RIGHT, -1, DT_RIGHT, TRUE);
 
     TreeNew_SetRedraw(hwnd, TRUE);
 
@@ -562,6 +563,7 @@ VOID PhpRemoveProcessNode(
     PhClearReference(&ProcessNode->TimeStampText);
     PhClearReference(&ProcessNode->FileModifiedTimeText);
     PhClearReference(&ProcessNode->FileSizeText);
+    PhClearReference(&ProcessNode->SubprocessCountText);
 
     PhDeleteGraphBuffers(&ProcessNode->CpuGraphBuffers);
     PhDeleteGraphBuffers(&ProcessNode->PrivateGraphBuffers);
@@ -1027,17 +1029,17 @@ static VOID PhpUpdateProcessNodeImage(
 {
     if (!(ProcessNode->ValidMask & PHPN_IMAGE))
     {
-        HANDLE processHandle;
-        PROCESS_BASIC_INFORMATION basicInfo;
-        PVOID imageBaseAddress;
-        PH_REMOTE_MAPPED_IMAGE mappedImage;
-
         if (ProcessNode->ProcessItem->IsSubsystemProcess)
         {
             ProcessNode->ImageSubsystem = IMAGE_SUBSYSTEM_POSIX_CUI;
         }
         else
         {
+            HANDLE processHandle;
+            PROCESS_BASIC_INFORMATION basicInfo;
+            PVOID imageBaseAddress;
+            PH_REMOTE_MAPPED_IMAGE mappedImage;
+
             if (NT_SUCCESS(PhOpenProcess(&processHandle, ProcessQueryAccess | PROCESS_VM_READ, ProcessNode->ProcessId)))
             {
                 if (NT_SUCCESS(PhGetProcessBasicInformation(processHandle, &basicInfo)) && basicInfo.PebBaseAddress != 0)
@@ -1768,6 +1770,12 @@ BEGIN_SORT_FUNCTION(FileSize)
 }
 END_SORT_FUNCTION
 
+BEGIN_SORT_FUNCTION(Subprocesses)
+{
+    sortResult = int64cmp(node1->Children->Count, node2->Children->Count);
+}
+END_SORT_FUNCTION
+
 BOOLEAN NTAPI PhpProcessTreeNewCallback(
     _In_ HWND hwnd,
     _In_ PH_TREENEW_MESSAGE Message,
@@ -1886,7 +1894,8 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                         SORT_FUNCTION(CfGuard),
                         SORT_FUNCTION(TimeStamp),
                         SORT_FUNCTION(FileModifiedTime),
-                        SORT_FUNCTION(FileSize)
+                        SORT_FUNCTION(FileSize),
+                        SORT_FUNCTION(Subprocesses)
                     };
                     int (__cdecl *sortFunction)(const void *, const void *);
 
@@ -2571,6 +2580,12 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 {
                     PhMoveReference(&node->FileSizeText, PhFormatSize(node->FileEndOfFile.QuadPart, -1));
                     getCellText->Text = node->FileSizeText->sr;
+                }
+                break;
+            case PHPRTLC_SUBPROCESSCOUNT:
+                {
+                    PhMoveReference(&node->SubprocessCountText, PhFormatUInt64(node->Children->Count, TRUE));
+                    getCellText->Text = node->SubprocessCountText->sr;
                 }
                 break;
             default:

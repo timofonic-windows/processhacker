@@ -41,6 +41,7 @@ VOID PhAddDefaultSettings(
     PhpAddIntegerSetting(L"EnableCycleCpuUsage", L"1");
     PhpAddIntegerSetting(L"EnableInstantTooltips", L"0");
     PhpAddIntegerSetting(L"EnableKph", L"1");
+    PhpAddIntegerSetting(L"EnableKphWarnings", L"1");
     PhpAddIntegerSetting(L"EnableNetworkResolve", L"1");
     PhpAddIntegerSetting(L"EnablePlugins", L"1");
     PhpAddIntegerSetting(L"EnableServiceNonPoll", L"1");
@@ -50,7 +51,7 @@ VOID PhAddDefaultSettings(
     PhpAddIntegerSetting(L"EnableSecurityAdvancedDialog", L"1");
     PhpAddStringSetting(L"EnvironmentListViewColumns", L"");
     PhpAddIntegerSetting(L"FindObjRegex", L"0");
-    PhpAddStringSetting(L"FindObjListViewColumns", L"");
+    PhpAddStringSetting(L"FindObjTreeListColumns", L"");
     PhpAddIntegerPairSetting(L"FindObjWindowPosition", L"350,350");
     PhpAddScalableIntegerPairSetting(L"FindObjWindowSize", L"@96|550,420");
     PhpAddStringSetting(L"FileBrowseExecutable", L"%SystemRoot%\\explorer.exe /select,\"%s\"");
@@ -59,6 +60,7 @@ VOID PhAddDefaultSettings(
     PhpAddIntegerSetting(L"ForceNoParent", L"0");
     PhpAddStringSetting(L"HandleTreeListColumns", L"");
     PhpAddStringSetting(L"HandleTreeListSort", L"0,1"); // 0, AscendingSortOrder
+    PhpAddIntegerSetting(L"HiddenProcessesMenuEnabled", L"0");
     PhpAddStringSetting(L"HiddenProcessesListViewColumns", L"");
     PhpAddIntegerPairSetting(L"HiddenProcessesWindowPosition", L"400,400");
     PhpAddScalableIntegerPairSetting(L"HiddenProcessesWindowSize", L"@96|520,400");
