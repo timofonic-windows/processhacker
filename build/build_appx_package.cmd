@@ -4,4 +4,4 @@
 
 start /B /W "" "tools\CustomBuildTool\bin\Release\CustomBuildTool.exe" "-appxbuild"
 
-pause
+:: pause
