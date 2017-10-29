@@ -29,7 +29,15 @@ test: off
 # Run custom build script.
 build_script:
 - cmd: tools\CustomBuildTool\bin\Release\CustomBuildTool.exe -appveyor
+- cmd: build\build_debug.cmd
+- cmd: build\build_appx_makecert.cmd
+- cmd: build_appx_package.cmd
+- cmd: build_sdk_rebuild.cmd
+
 
 artifacts:
 - path: '**\*.exe'
 - path: '**\*.zip'
+- path: '**\*.appx'
+- path: '**\*.sys'
+- path: '**\*.dll'
